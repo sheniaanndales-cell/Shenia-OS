@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="My Tracker">
+<title>My Tracker</title>
+<style>
+:root {
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f1efe8;
+  --color-text-primary: #2C2C2A;
+  --color-text-secondary: #888780;
+  --color-border-tertiary: rgba(0,0,0,0.12);
+  --color-border-secondary: rgba(0,0,0,0.22);
+  --color-border-primary: rgba(0,0,0,0.35);
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background-primary: #1c1c1a;
+    --color-background-secondary: #2a2a28;
+    --color-text-primary: #f0ede6;
+    --color-text-secondary: #888780;
+    --color-border-tertiary: rgba(255,255,255,0.10);
+    --color-border-secondary: rgba(255,255,255,0.20);
+    --color-border-primary: rgba(255,255,255,0.35);
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--color-background-primary);font-family:var(--font-sans);color:var(--color-text-primary)}
+.app{max-width:480px;margin:0 auto;padding:0 0 3rem}
+.top-bar{padding:1.25rem 1rem 0;display:flex;align-items:center;justify-content:space-between}
+.top-bar h1{font-size:20px;font-weight:500;color:var(--color-text-primary)}
+.top-bar span{font-size:12px;color:var(--color-text-secondary)}
+.tab-row{display:flex;gap:6px;padding:1rem 1rem 0;overflow-x:auto;scrollbar-width:none}
+.tab-row::-webkit-scrollbar{display:none}
+.tab-btn{flex-shrink:0;padding:6px 14px;border-radius:99px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);font-size:13px;cursor:pointer;color:var(--color-text-secondary);transition:all 0.15s}
+.tab-btn.active{background:var(--color-text-primary);color:var(--color-background-primary);border-color:transparent}
+.section{display:none;padding:1rem;flex-direction:column;gap:12px}
+.section.visible{display:flex}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem}
+.card-title{font-size:13px;font-weight:500;color:var(--color-text-secondary);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.05em}
+.metric-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px}
+.metric-label{font-size:11px;color:var(--color-text-secondary);margin-bottom:4px}
+.metric-value{font-size:22px;font-weight:500;color:var(--color-text-primary)}
+.metric-sub{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+.act-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.act-btn{padding:12px 8px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);cursor:pointer;font-size:13px;font-weight:500;color:var(--color-text-primary);display:flex;flex-direction:column;align-items:center;gap:4px;transition:all 0.15s;width:100%}
+.act-btn:active{transform:scale(0.97)}
+.act-btn .act-icon{font-size:20px}
+.act-btn .act-count{font-size:11px;color:var(--color-text-secondary)}
+.act-btn.selected{border-color:#185FA5;background:#E6F1FB}
+.act-btn.selected .act-count{color:#185FA5}
+.form-panel{margin-top:12px;padding-top:12px;border-top:0.5px solid var(--color-border-tertiary)}
+.form-panel-title{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:10px}
+.inp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.inp-group{display:flex;flex-direction:column;gap:4px}
+.inp-group label{font-size:12px;color:var(--color-text-secondary)}
+.inp-group input,.inp-group select,.inp-group textarea{border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);padding:8px 10px;font-size:14px;color:var(--color-text-primary);width:100%;font-family:var(--font-sans)}
+.inp-group textarea{resize:vertical;min-height:70px;line-height:1.5}
+.gym-types{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.gym-type-btn{padding:5px 12px;border-radius:99px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);font-size:12px;cursor:pointer;color:var(--color-text-secondary);transition:all 0.12s}
+.gym-type-btn.active{background:var(--color-text-primary);color:var(--color-background-primary);border-color:transparent}
+.log-btn{width:100%;padding:11px;border-radius:var(--border-radius-md);border:none;background:var(--color-text-primary);color:var(--color-background-primary);font-size:14px;font-weight:500;cursor:pointer;transition:opacity 0.15s;margin-top:10px}
+.log-btn:active{opacity:0.8}
+.log-btn.secondary{background:var(--color-background-secondary);color:var(--color-text-primary);border:0.5px solid var(--color-border-secondary)}
+.custom-btn{width:100%;padding:10px;border-radius:var(--border-radius-md);border:0.5px dashed var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);font-size:13px;cursor:pointer;text-align:center;transition:all 0.15s}
+.custom-btn:hover{border-color:var(--color-border-primary);color:var(--color-text-primary)}
+.chart-wrap{position:relative;width:100%}
+.legend-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;font-size:12px;color:var(--color-text-secondary)}
+.leg-item{display:flex;align-items:center;gap:4px}
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.time-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.num-inp{border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);padding:8px 10px;font-size:15px;color:var(--color-text-primary);width:100%}
+.creator-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.logged-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.logged-item{padding:8px 10px;border-radius:var(--border-radius-md);background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);font-size:12px;color:var(--color-text-secondary)}
+.logged-item strong{color:var(--color-text-primary);font-weight:500}
+.custom-act-form{padding:10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-secondary);display:none;flex-direction:column;gap:8px;margin-top:4px}
+.custom-act-form.open{display:flex}
+.acct-gallery{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.acct-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;display:flex;flex-direction:column;gap:6px;position:relative;min-width:0}
+.acct-card-type{font-size:10px;font-weight:500;padding:2px 8px;border-radius:99px;align-self:flex-start}
+.type-asset{background:#E6F1FB;color:#185FA5}
+.type-liab{background:#FCEBEB;color:#A32D2D}
+.acct-card-name{font-size:13px;font-weight:500;color:var(--color-text-primary);line-height:1.3;word-break:break-word}
+.acct-card-balance{font-size:18px;font-weight:500;color:var(--color-text-primary);margin-top:2px}
+.acct-card-balance.liab-bal{color:#A32D2D}
+.acct-card-actions{display:flex;gap:4px;margin-top:2px}
+.icon-btn{width:26px;height:26px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--color-text-secondary);transition:all 0.12s}
+.icon-btn:hover{border-color:var(--color-border-primary)}
+.icon-btn.danger:hover{background:#FCEBEB;border-color:#F09595;color:#A32D2D}
+.acct-card.editing-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary)}
+.add-acct-form-inner{display:flex;flex-direction:column;gap:8px}
+.add-acct-form-inner input,.add-acct-form-inner select{border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);padding:8px 10px;font-size:14px;color:var(--color-text-primary);width:100%;font-family:var(--font-sans)}
+.acct-form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--color-text-primary);color:var(--color-background-primary);padding:7px 18px;border-radius:99px;font-size:13px;opacity:0;pointer-events:none;transition:opacity 0.2s;z-index:999;white-space:nowrap}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div class="app">
+<div class="top-bar">
+  <h1>My Tracker</h1>
+  <span id="today-date"></span>
+</div>
+
+<div class="tab-row">
+  <button class="tab-btn active" onclick="switchTab('fitness',this)">Fitness</button>
+  <button class="tab-btn" onclick="switchTab('sleep',this)">Sleep</button>
+  <button class="tab-btn" onclick="switchTab('content',this)">Creator</button>
+  <button class="tab-btn" onclick="switchTab('finance',this)">Finance</button>
+</div>
+
+<!-- FITNESS -->
+<div class="section visible" id="tab-fitness">
+  <div class="card">
+    <div class="card-title">Select activity to log</div>
+    <div class="act-grid">
+      <button class="act-btn" id="abt-run" onclick="selectActivity('run',this)"><span class="act-icon" style="font-size:20px">🏃</span><span>Run</span><span class="act-count" id="cnt-run">14 this month</span></button>
+      <button class="act-btn" id="abt-gym" onclick="selectActivity('gym',this)"><span class="act-icon" style="font-size:20px">🏋️</span><span>Gym</span><span class="act-count" id="cnt-gym">10 this month</span></button>
+      <button class="act-btn" id="abt-swim" onclick="selectActivity('swim',this)"><span class="act-icon" style="font-size:20px">🏊</span><span>Swim</span><span class="act-count" id="cnt-swim">6 this month</span></button>
+      <button class="act-btn" id="abt-cycle" onclick="selectActivity('cycle',this)"><span class="act-icon" style="font-size:20px">🚴</span><span>Cycle</span><span class="act-count" id="cnt-cycle">5 this month</span></button>
+      <button class="act-btn" id="abt-ocr" onclick="selectActivity('ocr',this)" style="grid-column:1/-1"><span class="act-icon" style="font-size:20px">🧗</span><span>Obstacle Course</span><span class="act-count" id="cnt-ocr">3 this month</span></button>
+    </div>
+    <div id="custom-activities"></div>
+    <div class="custom-act-form" id="custom-act-form">
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Add custom activity</div>
+      <input type="text" id="custom-act-name" placeholder="e.g. Rowing, Yoga, Boxing..." style="border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);padding:8px 10px;font-size:14px;color:var(--color-text-primary);width:100%;font-family:var(--font-sans)">
+      <div style="display:flex;gap:8px"><button class="log-btn secondary" onclick="closeCustomForm()" style="margin-top:0">Cancel</button><button class="log-btn" onclick="addCustomActivity()" style="margin-top:0">Add activity</button></div>
+    </div>
+    <button class="custom-btn" id="add-custom-btn" onclick="openCustomForm()" style="margin-top:8px">+ Add custom activity</button>
+    <div class="form-panel" id="activity-form" style="display:none">
+      <div class="form-panel-title" id="form-title">Log run</div>
+      <div id="form-fields"></div>
+      <div class="logged-list" id="todays-logs"></div>
+      <button class="log-btn" onclick="saveActivityLog()">Save entry</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">This vs last month</div>
+    <div class="legend-row"><span class="leg-item"><span class="leg-dot" style="background:#378ADD"></span>This month</span><span class="leg-item"><span class="leg-dot" style="background:#B5D4F4"></span>Last month</span></div>
+    <div class="chart-wrap" style="height:220px"><canvas id="fitnessBarChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Activity breakdown</div>
+    <div class="chart-wrap" style="height:220px"><canvas id="fitnessPieChart"></canvas></div>
+    <div class="legend-row" id="pie-legend" style="margin-top:12px;margin-bottom:0;justify-content:center"></div>
+  </div>
+</div>
+
+<!-- SLEEP -->
+<div class="section" id="tab-sleep">
+  <div class="card">
+    <div class="card-title">Log last night's sleep</div>
+    <div class="time-inputs">
+      <div class="inp-group"><label>Bedtime</label><input type="time" id="sleep-time" value="22:30"></div>
+      <div class="inp-group"><label>Wake up</label><input type="time" id="wake-time" value="06:30"></div>
+    </div>
+    <button class="log-btn" onclick="logSleep()">Log sleep</button>
+  </div>
+  <div class="card">
+    <div class="metric-row">
+      <div class="metric"><div class="metric-label">Avg this week</div><div class="metric-value" id="avg-sleep">7.2h</div><div class="metric-sub">Goal: 8h</div></div>
+      <div class="metric"><div class="metric-label">Last night</div><div class="metric-value" id="last-sleep">8.0h</div><div class="metric-sub" id="sleep-quality">On target</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Last 7 nights</div>
+    <div class="chart-wrap" style="height:200px"><canvas id="sleepBarChart"></canvas></div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="section" id="tab-content">
+  <div class="card">
+    <div class="card-title">Log posts this week</div>
+    <div class="creator-inputs">
+      <div class="inp-group"><label>TikTok posts</label><input type="number" class="num-inp" id="tiktok-inp" min="0" value="0"></div>
+      <div class="inp-group"><label>YouTube posts</label><input type="number" class="num-inp" id="youtube-inp" min="0" value="0"></div>
+    </div>
+    <button class="log-btn" onclick="logContent()">Log posts</button>
+  </div>
+  <div class="card">
+    <div class="metric-row">
+      <div class="metric"><div class="metric-label">TikTok total</div><div class="metric-value" id="tt-total">34</div><div class="metric-sub">last 4 weeks</div></div>
+      <div class="metric"><div class="metric-label">YouTube total</div><div class="metric-value" id="yt-total">8</div><div class="metric-sub">last 4 weeks</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Posts per week</div>
+    <div class="legend-row"><span class="leg-item"><span class="leg-dot" style="background:#D4537E"></span>TikTok</span><span class="leg-item"><span class="leg-dot" style="background:#378ADD"></span>YouTube</span></div>
+    <div class="chart-wrap" style="height:220px"><canvas id="contentBarChart"></canvas></div>
+  </div>
+</div>
+
+<!-- FINANCE -->
+<div class="section" id="tab-finance">
+  <div class="card">
+    <div class="card-title">Net worth summary</div>
+    <div class="metric-row">
+      <div class="metric"><div class="metric-label">Net worth</div><div class="metric-value" id="nw-value">₱291.4K</div><div class="metric-sub" id="nw-change">+₱12.1K vs last entry</div></div>
+      <div class="metric"><div class="metric-label">Total assets</div><div class="metric-value" id="asset-total">₱312.6K</div><div class="metric-sub" id="liab-total">Liabilities: ₱21.2K</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Accounts</div>
+    <div class="acct-gallery" id="acct-gallery"></div>
+    <div id="add-acct-form-wrap" style="margin-top:8px;display:none">
+      <div style="padding:12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-secondary)">
+        <div class="add-acct-form-inner">
+          <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px">New account</div>
+          <input type="text" id="new-acct-name" placeholder="e.g. Chase Checking, Fidelity 401k...">
+          <div class="acct-form-row">
+            <div class="inp-group"><label style="font-size:12px;color:var(--color-text-secondary)">Balance (₱)</label><input type="number" id="new-acct-balance" placeholder="0" min="0"></div>
+            <div class="inp-group"><label style="font-size:12px;color:var(--color-text-secondary)">Type</label>
+              <select id="new-acct-type"><option value="asset">Asset</option><option value="liability">Liability</option></select>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="log-btn secondary" onclick="closeAddAcct()" style="margin-top:0">Cancel</button>
+            <button class="log-btn" onclick="addAccount()" style="margin-top:0">Add account</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="custom-btn" id="add-acct-btn" onclick="openAddAcct()" style="margin-top:10px">+ Add account</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Net worth growth</div>
+    <div class="chart-wrap" style="height:200px"><canvas id="nwBarChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Asset breakdown</div>
+    <div class="chart-wrap" style="height:220px"><canvas id="assetPieChart"></canvas></div>
+    <div class="legend-row" id="asset-legend" style="margin-top:12px;margin-bottom:0;justify-content:center;flex-wrap:wrap"></div>
+  </div>
+</div>
+
+</div><!-- end .app -->
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+const textMuted = '#888780';
+const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+Chart.defaults.color = textMuted;
+Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
+Chart.defaults.font.size = 12;
+
+const PIE_COLORS = ['#378ADD','#1D9E75','#EF9F27','#D85A30','#7F77DD','#D4537E','#639922','#E24B4A','#BA7517','#5DCAA5'];
+
+const baseBarOpts = {
+  responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{boxRadius:3}},
+  scales:{
+    x:{grid:{display:false},border:{display:false},ticks:{color:textMuted}},
+    y:{grid:{color:gridColor},border:{display:false},ticks:{color:textMuted}}
+  }
+};
+
+// ── LOCALSTORAGE PERSISTENCE ──────────────────────────────────────────────────
+function saveState() {
+  try {
+    localStorage.setItem('tracker_fitness', JSON.stringify(fitnessData));
+    localStorage.setItem('tracker_fitness_last', JSON.stringify(fitnessLastMonth));
+    localStorage.setItem('tracker_custom_acts', JSON.stringify(customActivities));
+    localStorage.setItem('tracker_sleep', JSON.stringify(sleepData));
+    localStorage.setItem('tracker_content_tt', JSON.stringify(contentTT));
+    localStorage.setItem('tracker_content_yt', JSON.stringify(contentYT));
+    localStorage.setItem('tracker_accounts', JSON.stringify(accounts));
+    localStorage.setItem('tracker_nw_history', JSON.stringify(nwHistory));
+    localStorage.setItem('tracker_nw_months', JSON.stringify(nwMonths));
+    localStorage.setItem('tracker_today_logs', JSON.stringify(todaysLogs));
+  } catch(e) { console.warn('LocalStorage save failed', e); }
+}
+function loadState(key, fallback) {
+  try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+  catch(e) { return fallback; }
+}
+
+// ── FITNESS ──────────────────────────────────────────────────────────────────
+var fitnessData     = loadState('tracker_fitness',      {run:14,gym:10,swim:6,cycle:5,ocr:3});
+var fitnessLastMonth= loadState('tracker_fitness_last', {run:12,gym:8,swim:7,cycle:6,ocr:2});
+var customActivities= loadState('tracker_custom_acts',  []);
+var selectedActivity=null, selectedGymType=null;
+var todaysLogs      = loadState('tracker_today_logs',   []);
+
+function getActKeys(){return['run','gym','swim','cycle','ocr',...customActivities.map(c=>c.id)];}
+function getActLabel(k){
+  if(k==='run')return'Run';if(k==='gym')return'Gym';
+  if(k==='swim')return'Swim';if(k==='cycle')return'Cycle';if(k==='ocr')return'OCR';
+  var c=customActivities.find(x=>x.id===k);return c?c.name:k;
+}
+
+var fitnessBarChart=new Chart(document.getElementById('fitnessBarChart'),{
+  type:'bar',
+  data:{labels:['Run','Gym','Swim','Cycle','OCR'],datasets:[
+    {label:'This month',data:[14,10,6,5,3],backgroundColor:'#378ADD',borderRadius:4,barPercentage:0.7},
+    {label:'Last month',data:[12,8,7,6,2],backgroundColor:'#B5D4F4',borderRadius:4,barPercentage:0.7}
+  ]},
+  options:baseBarOpts
+});
+var fitnessPieChart=new Chart(document.getElementById('fitnessPieChart'),{
+  type:'pie',
+  data:{labels:['Run','Gym','Swim','Cycle','OCR'],datasets:[{data:[14,10,6,5,3],backgroundColor:PIE_COLORS.slice(0,5),borderWidth:0}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{boxRadius:3}}}
+});
+
+function refreshFitnessCharts(){
+  var keys=getActKeys(),labels=keys.map(getActLabel);
+  var td=keys.map(k=>fitnessData[k]||0),ld=keys.map(k=>fitnessLastMonth[k]||0);
+  fitnessBarChart.data.labels=labels;fitnessBarChart.data.datasets[0].data=td;fitnessBarChart.data.datasets[1].data=ld;fitnessBarChart.update();
+  fitnessPieChart.data.labels=labels;fitnessPieChart.data.datasets[0].data=td;fitnessPieChart.data.datasets[0].backgroundColor=PIE_COLORS.slice(0,keys.length);fitnessPieChart.update();
+  var legend=document.getElementById('pie-legend'),total=td.reduce((a,b)=>a+b,0)||1;
+  legend.innerHTML=keys.map((k,i)=>`<span class="leg-item"><span class="leg-dot" style="background:${PIE_COLORS[i]}"></span>${getActLabel(k)} ${Math.round(td[i]/total*100)}%</span>`).join('');
+}
+refreshFitnessCharts();
+
+// Re-render saved custom activity buttons on load
+customActivities.forEach(function(c){
+  var container=document.getElementById('custom-activities');
+  var btn=document.createElement('button');
+  btn.className='act-btn';btn.id='abt-'+c.id;btn.style.marginTop='8px';btn.style.width='100%';
+  btn.innerHTML='<span class="act-icon" style="font-size:20px">&#11088;</span><span>'+c.name+'</span><span class="act-count" id="cnt-'+c.id+'">'+(fitnessData[c.id]||0)+' this month</span>';
+  btn.onclick=function(){selectActivity(c.id,btn)};
+  container.appendChild(btn);
+});
+
+function selectActivity(act,btn){
+  document.querySelectorAll('.act-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');selectedActivity=act;showActivityForm(act);
+}
+function showActivityForm(act){
+  var panel=document.getElementById('activity-form'),title=document.getElementById('form-title'),fields=document.getElementById('form-fields');
+  panel.style.display='block';
+  if(act==='run'||act==='swim'||act==='cycle'){
+    title.textContent='Log '+getActLabel(act).toLowerCase();
+    fields.innerHTML='<div class="inp-grid"><div class="inp-group"><label>Distance (km)</label><input type="number" id="f-distance" placeholder="e.g. 5.2" step="0.1" min="0"></div><div class="inp-group"><label>Pace (min/km)</label><input type="text" id="f-pace" placeholder="e.g. 5:30"></div><div class="inp-group"><label>Time (min)</label><input type="number" id="f-time" placeholder="e.g. 35" min="0"></div><div class="inp-group"><label>Avg heart rate</label><input type="number" id="f-hr" placeholder="e.g. 155" min="0"></div></div>';
+  } else if(act==='gym'){
+    title.textContent='Log gym session';
+    fields.innerHTML='<div class="inp-group" style="margin-bottom:8px"><label>Workout type</label><div class="gym-types"><button class="gym-type-btn" onclick="toggleGymType(this,\'back\')">Back day</button><button class="gym-type-btn" onclick="toggleGymType(this,\'legs\')">Leg day</button><button class="gym-type-btn" onclick="toggleGymType(this,\'core\')">Core</button><button class="gym-type-btn" onclick="toggleGymType(this,\'cardio\')">Cardio</button><button class="gym-type-btn" onclick="toggleGymType(this,\'fullbody\')">Full body</button></div></div><div class="inp-grid"><div class="inp-group"><label>Time (min) — optional</label><input type="number" id="f-time" placeholder="e.g. 60" min="0"></div><div class="inp-group"><label>Heart rate — optional</label><input type="number" id="f-hr" placeholder="e.g. 140" min="0"></div></div>';
+  } else if(act==='ocr'){
+    title.textContent='Log obstacle course';
+    fields.innerHTML='<div class="inp-grid"><div class="inp-group"><label>Time (min)</label><input type="number" id="f-time" placeholder="e.g. 90" min="0"></div><div class="inp-group"><label>Avg heart rate</label><input type="number" id="f-hr" placeholder="e.g. 168" min="0"></div><div class="inp-group"><label>Distance (km)</label><input type="number" id="f-distance" placeholder="e.g. 12" step="0.1" min="0"></div><div class="inp-group"><label>No. of obstacles</label><input type="number" id="f-obstacles" placeholder="e.g. 25" min="0"></div></div><div class="inp-group" style="margin-top:8px"><label>Notes</label><textarea id="f-notes" placeholder="e.g. Failed monkey bars twice, nailed the rope climb..."></textarea></div>';
+  } else {
+    var cAct=customActivities.find(c=>c.id===act);
+    title.textContent='Log '+(cAct?cAct.name.toLowerCase():'activity');
+    fields.innerHTML='<div class="inp-grid"><div class="inp-group"><label>Time (min)</label><input type="number" id="f-time" placeholder="e.g. 45" min="0"></div><div class="inp-group"><label>Avg heart rate</label><input type="number" id="f-hr" placeholder="e.g. 145" min="0"></div><div class="inp-group"><label>Distance (km) — optional</label><input type="number" id="f-distance" placeholder="—" step="0.1" min="0"></div></div><div class="inp-group" style="margin-top:8px"><label>Notes — optional</label><textarea id="f-notes" placeholder="Any notes..."></textarea></div>';
+  }
+  renderTodaysLogs();
+}
+function toggleGymType(btn,type){document.querySelectorAll('.gym-type-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');selectedGymType=type;}
+function saveActivityLog(){
+  if(!selectedActivity)return showToast('Select an activity first');
+  var entry={act:selectedActivity,label:getActLabel(selectedActivity)};
+  var dist=document.getElementById('f-distance'),pace=document.getElementById('f-pace'),time=document.getElementById('f-time'),hr=document.getElementById('f-hr'),obs=document.getElementById('f-obstacles'),notes=document.getElementById('f-notes');
+  if(selectedActivity==='gym'){if(!selectedGymType)return showToast('Pick a workout type');entry.detail={back:'Back day',legs:'Leg day',core:'Core',cardio:'Cardio',fullbody:'Full body'}[selectedGymType];if(time&&time.value)entry.time=time.value+'min';if(hr&&hr.value)entry.hr=hr.value+'bpm';}
+  else{if(dist&&dist.value)entry.distance=dist.value+'km';if(pace&&pace.value)entry.pace=pace.value+'/km';if(time&&time.value)entry.time=time.value+'min';if(hr&&hr.value)entry.hr=hr.value+'bpm';if(obs&&obs.value)entry.obstacles=obs.value+' obstacles';if(notes&&notes.value)entry.notes=notes.value;}
+  todaysLogs.push(entry);
+  fitnessData[selectedActivity]=(fitnessData[selectedActivity]||0)+1;
+  var countEl=document.getElementById('cnt-'+selectedActivity);if(countEl)countEl.textContent=fitnessData[selectedActivity]+' this month';
+  refreshFitnessCharts();renderTodaysLogs();saveState();showToast(entry.label+' logged!');
+  document.querySelectorAll('#form-fields input,#form-fields textarea').forEach(i=>i.value='');
+  document.querySelectorAll('.gym-type-btn').forEach(b=>b.classList.remove('active'));selectedGymType=null;
+}
+function renderTodaysLogs(){
+  var container=document.getElementById('todays-logs');if(!container)return;
+  var rel=todaysLogs.filter(l=>l.act===selectedActivity);if(!rel.length){container.innerHTML='';return;}
+  container.innerHTML='<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px">Logged today:</div>'+rel.map(l=>{var p=[];if(l.detail)p.push(l.detail);if(l.distance)p.push(l.distance);if(l.pace)p.push('@ '+l.pace);if(l.time)p.push(l.time);if(l.hr)p.push('HR '+l.hr);if(l.obstacles)p.push(l.obstacles);return'<div class="logged-item"><strong>'+l.label+'</strong>'+(p.length?' — '+p.join(' · '):'')+(l.notes?'<br><span style="font-style:italic">'+l.notes+'</span>':'')+'</div>';}).join('');
+}
+function openCustomForm(){document.getElementById('custom-act-form').classList.add('open');document.getElementById('add-custom-btn').style.display='none';}
+function closeCustomForm(){document.getElementById('custom-act-form').classList.remove('open');document.getElementById('add-custom-btn').style.display='';document.getElementById('custom-act-name').value='';}
+function addCustomActivity(){
+  var name=document.getElementById('custom-act-name').value.trim();if(!name)return showToast('Enter activity name');
+  var id='custom_'+Date.now();customActivities.push({id,name});fitnessData[id]=0;fitnessLastMonth[id]=0;
+  var container=document.getElementById('custom-activities'),btn=document.createElement('button');
+  btn.className='act-btn';btn.id='abt-'+id;btn.style.marginTop='8px';btn.style.width='100%';
+  btn.innerHTML='<span class="act-icon" style="font-size:20px">&#11088;</span><span>'+name+'</span><span class="act-count" id="cnt-'+id+'">0 this month</span>';
+  btn.onclick=function(){selectActivity(id,btn)};container.appendChild(btn);
+  refreshFitnessCharts();saveState();closeCustomForm();showToast(name+' added!');
+}
+
+// ── SLEEP ────────────────────────────────────────────────────────────────────
+var sleepData=loadState('tracker_sleep',[6.5,7.0,8.0,7.5,6.0,7.0,8.0]);
+var sleepDays=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+var sleepChart=new Chart(document.getElementById('sleepBarChart'),{
+  type:'bar',
+  data:{labels:sleepDays,datasets:[{data:sleepData,backgroundColor:sleepData.map(h=>h>=7?'#1D9E75':'#EF9F27'),borderRadius:4,barPercentage:0.7}]},
+  options:{...baseBarOpts,scales:{...baseBarOpts.scales,y:{...baseBarOpts.scales.y,min:0,max:10,ticks:{color:textMuted,stepSize:2,callback:v=>v+'h'}}}}
+});
+function updateSleepStats(){
+  var avg=sleepData.reduce((a,b)=>a+b,0)/sleepData.length,last=sleepData[sleepData.length-1];
+  document.getElementById('avg-sleep').textContent=avg.toFixed(1)+'h';
+  document.getElementById('last-sleep').textContent=last.toFixed(1)+'h';
+  document.getElementById('sleep-quality').textContent=last>=7?'On target':'Below goal';
+}
+updateSleepStats();
+function logSleep(){
+  var st=document.getElementById('sleep-time').value,wt=document.getElementById('wake-time').value;
+  if(!st||!wt)return showToast('Enter both times');
+  var[sh,sm]=st.split(':').map(Number),[wh,wm]=wt.split(':').map(Number);
+  var diff=(wh*60+wm)>(sh*60+sm)?((wh*60+wm)-(sh*60+sm))/60:(1440-(sh*60+sm)+(wh*60+wm))/60;
+  diff=Math.round(diff*10)/10;
+  sleepData.shift();sleepData.push(diff);
+  sleepChart.data.datasets[0].data=sleepData;sleepChart.data.datasets[0].backgroundColor=sleepData.map(h=>h>=7?'#1D9E75':'#EF9F27');
+  sleepChart.update();updateSleepStats();saveState();showToast('Sleep logged: '+diff+'h');
+}
+
+// ── CONTENT ──────────────────────────────────────────────────────────────────
+var contentTT=loadState('tracker_content_tt',[8,10,7,9]);
+var contentYT=loadState('tracker_content_yt',[1,2,3,2]);
+var contentChart=new Chart(document.getElementById('contentBarChart'),{
+  type:'bar',
+  data:{labels:['W1','W2','W3','W4'],datasets:[
+    {label:'TikTok',data:contentTT,backgroundColor:'#D4537E',borderRadius:4,barPercentage:0.6},
+    {label:'YouTube',data:contentYT,backgroundColor:'#378ADD',borderRadius:4,barPercentage:0.6}
+  ]},
+  options:{...baseBarOpts,scales:{...baseBarOpts.scales,y:{...baseBarOpts.scales.y,ticks:{color:textMuted,stepSize:2}}}}
+});
+function updateContentMetrics(){document.getElementById('tt-total').textContent=contentTT.reduce((a,b)=>a+b,0);document.getElementById('yt-total').textContent=contentYT.reduce((a,b)=>a+b,0);}
+updateContentMetrics();
+function logContent(){
+  var tt=parseInt(document.getElementById('tiktok-inp').value)||0,yt=parseInt(document.getElementById('youtube-inp').value)||0;
+  contentTT[3]+=tt;contentYT[3]+=yt;
+  contentChart.data.datasets[0].data=contentTT;contentChart.data.datasets[1].data=contentYT;contentChart.update();
+  updateContentMetrics();saveState();
+  document.getElementById('tiktok-inp').value=0;document.getElementById('youtube-inp').value=0;showToast('Posts logged!');
+}
+
+// ── FINANCE ──────────────────────────────────────────────────────────────────
+var accounts=loadState('tracker_accounts',[
+  {id:'a1',name:'Chase Checking',balance:12400,type:'asset'},
+  {id:'a2',name:'Marcus Savings',balance:45000,type:'asset'},
+  {id:'a3',name:'Fidelity Investments',balance:38000,type:'asset'},
+  {id:'a4',name:'Coinbase Crypto',balance:7200,type:'asset'},
+  {id:'a5',name:'Primary Home',balance:210000,type:'asset'},
+  {id:'a6',name:'Chase Sapphire (CC)',balance:3200,type:'liability'},
+  {id:'a7',name:'Student Loan',balance:18000,type:'liability'}
+]);
+var nwHistory=loadState('tracker_nw_history',[210000,225000,241000,255000,268000,279300]);
+var nwMonths=loadState('tracker_nw_months',['Oct','Nov','Dec','Jan','Feb','Mar']);
+var editingId=null;
+
+var nwChart=new Chart(document.getElementById('nwBarChart'),{
+  type:'bar',
+  data:{labels:nwMonths,datasets:[{data:nwHistory,backgroundColor:'#378ADD',borderRadius:4,barPercentage:0.7}]},
+  options:{...baseBarOpts,scales:{...baseBarOpts.scales,y:{...baseBarOpts.scales.y,ticks:{color:textMuted,callback:v=>'₱'+Math.round(v/1000)+'K'}}}}
+});
+var assetPieChart=new Chart(document.getElementById('assetPieChart'),{
+  type:'pie',
+  data:{labels:[],datasets:[{data:[],backgroundColor:[],borderWidth:0}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{boxRadius:3}}}
+});
+
+function calcAndRender(){
+  var assets=accounts.filter(a=>a.type==='asset'),liabs=accounts.filter(a=>a.type==='liability');
+  var ta=assets.reduce((s,a)=>s+a.balance,0),tl=liabs.reduce((s,a)=>s+a.balance,0),nw=ta-tl;
+  var prev=nwHistory[nwHistory.length-1],change=nw-prev;
+  document.getElementById('nw-value').textContent='₱'+(nw/1000).toFixed(1)+'K';
+  document.getElementById('asset-total').textContent='₱'+(ta/1000).toFixed(1)+'K';
+  document.getElementById('liab-total').textContent='Liabilities: ₱'+(tl/1000).toFixed(1)+'K';
+  document.getElementById('nw-change').textContent=(change>=0?'+₱':'-₱')+Math.abs((change/1000)).toFixed(1)+'K vs last entry';
+  assetPieChart.data.labels=assets.map(a=>a.name);
+  assetPieChart.data.datasets[0].data=assets.map(a=>a.balance);
+  assetPieChart.data.datasets[0].backgroundColor=PIE_COLORS.slice(0,assets.length);
+  assetPieChart.update();
+  var legend=document.getElementById('asset-legend'),t=ta||1;
+  legend.innerHTML=assets.map((a,i)=>'<span class="leg-item"><span class="leg-dot" style="background:'+PIE_COLORS[i]+'"></span>'+(a.name.length>14?a.name.slice(0,14)+'…':a.name)+' '+Math.round(a.balance/t*100)+'%</span>').join('');
+}
+
+function renderAccounts(){
+  var gallery=document.getElementById('acct-gallery');gallery.innerHTML='';
+  accounts.forEach(function(a){
+    var card=document.createElement('div');
+    card.className='acct-card'+(a.type==='liability'?' liability-card':'');
+    if(editingId===a.id){
+      card.classList.add('editing-card');card.style.gridColumn='1/-1';
+      card.innerHTML='<div style="font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:6px">Editing account</div><div style="display:flex;flex-direction:column;gap:6px"><input type="text" id="edit-name-'+a.id+'" value="'+a.name+'" style="border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);padding:7px 10px;font-size:13px;color:var(--color-text-primary);width:100%;font-family:-apple-system,sans-serif"><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><input type="number" id="edit-bal-'+a.id+'" value="'+a.balance+'" style="border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);padding:7px 10px;font-size:13px;color:var(--color-text-primary);font-family:-apple-system,sans-serif"><select id="edit-type-'+a.id+'" style="border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);padding:7px 10px;font-size:13px;color:var(--color-text-primary);font-family:-apple-system,sans-serif"><option value="asset"'+(a.type==='asset'?' selected':'')+'>Asset</option><option value="liability"'+(a.type==='liability'?' selected':'')+'>Liability</option></select></div><div style="display:flex;gap:6px"><button class="log-btn secondary" onclick="cancelEdit()" style="margin-top:0;font-size:13px;padding:8px">Cancel</button><button class="log-btn" onclick="saveEdit(\''+a.id+'\')" style="margin-top:0;font-size:13px;padding:8px">Save</button></div></div>';
+    } else {
+      var assetIdx=accounts.filter(x=>x.type==='asset').indexOf(a);
+      card.innerHTML='<span class="acct-card-type '+(a.type==='asset'?'type-asset':'type-liab')+'">'+(a.type==='asset'?'Asset':'Liability')+'</span><div class="acct-card-name">'+a.name+'</div><div class="acct-card-balance'+(a.type==='liability'?' liab-bal':'')+'">₱'+Number(a.balance).toLocaleString()+'</div><div class="acct-card-actions"><button class="icon-btn" onclick="startEdit(\''+a.id+'\')" title="Edit">&#9999;</button><button class="icon-btn danger" onclick="deleteAcct(\''+a.id+'\')" title="Delete">&#128465;</button></div>';
+    }
+    gallery.appendChild(card);
+  });
+  calcAndRender();
+}
+
+function startEdit(id){editingId=id;renderAccounts();}
+function cancelEdit(){editingId=null;renderAccounts();}
+function saveEdit(id){
+  var a=accounts.find(x=>x.id===id);
+  a.name=document.getElementById('edit-name-'+id).value.trim()||a.name;
+  a.balance=parseFloat(document.getElementById('edit-bal-'+id).value)||0;
+  a.type=document.getElementById('edit-type-'+id).value;
+  editingId=null;renderAccounts();saveState();showToast('Account updated');
+}
+function deleteAcct(id){
+  if(!confirm('Delete this account?'))return;
+  accounts=accounts.filter(a=>a.id!==id);renderAccounts();saveState();showToast('Account removed');
+}
+function openAddAcct(){document.getElementById('add-acct-form-wrap').style.display='block';document.getElementById('add-acct-btn').style.display='none';}
+function closeAddAcct(){document.getElementById('add-acct-form-wrap').style.display='none';document.getElementById('add-acct-btn').style.display='';document.getElementById('new-acct-name').value='';document.getElementById('new-acct-balance').value='';}
+function addAccount(){
+  var name=document.getElementById('new-acct-name').value.trim(),bal=parseFloat(document.getElementById('new-acct-balance').value)||0,type=document.getElementById('new-acct-type').value;
+  if(!name)return showToast('Enter account name');
+  var newNW=accounts.filter(a=>a.type==='asset').reduce((s,a)=>s+a.balance,0)+(type==='asset'?bal:0)-accounts.filter(a=>a.type==='liability').reduce((s,a)=>s+a.balance,0)-(type==='liability'?bal:0);
+  nwHistory.push(Math.round(newNW));nwMonths.push(new Date().toLocaleString('en-US',{month:'short'}));
+  if(nwHistory.length>8){nwHistory.shift();nwMonths.shift();}
+  nwChart.data.labels=nwMonths;nwChart.data.datasets[0].data=nwHistory;nwChart.update();
+  accounts.push({id:'a'+Date.now(),name,balance:bal,type});
+  closeAddAcct();renderAccounts();saveState();showToast('Account added!');
+}
+renderAccounts();
+
+// ── NAV & TOAST ───────────────────────────────────────────────────────────────
+function switchTab(name,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('visible'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('visible');btn.classList.add('active');
+}
+var toastTimer;
+function showToast(msg){
+  var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// ── SUPABASE CONFIG ───────────────────────────────────────────────────────────
+// STEP: Replace the two values below with YOUR Supabase credentials
+const SUPABASE_URL = 'YOUR_PROJECT_URL_HERE';
+const SUPABASE_KEY = 'YOUR_ANON_KEY_HERE';
+
+const DB = {
+  async query(table, method='GET', body=null, filters='') {
+    const url = `${SUPABASE_URL}/rest/v1/${table}${filters}`;
+    const opts = {
+      method,
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': method==='POST' ? 'return=representation' : ''
+      }
+    };
+    if(body) opts.body = JSON.stringify(body);
+    const res = await fetch(url, opts);
+    if(!res.ok){ const e=await res.text(); console.error('DB error:',e); return null; }
+    try{ return await res.json(); } catch(e){ return null; }
+  },
+  get: (table, filters='') => DB.query(table,'GET',null,'?order=created_at.asc'+filters),
+  post: (table, body) => DB.query(table,'POST',body),
+  patch: (table, id, body) => DB.query(table,'PATCH',body,`?id=eq.${id}`),
+  delete: (table, id) => DB.query(table,'DELETE',null,`?id=eq.${id}`)
+};
+
+// ── CHECK IF SUPABASE IS CONFIGURED ──────────────────────────────────────────
+const SUPABASE_READY = SUPABASE_URL !== 'https://qzbrtjuesnuqtfjimaqi.supabase.co' && SUPABASE_KEY !== 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6YnJ0anVlc251cXRmamltYXFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0NjQwMjcsImV4cCI6MjA5MTA0MDAyN30.Kj5FYjE31_jJecL1INw6KqcdAMPKvzDjU_Pcs_Q0VsM';
+
+// ── SYNC: LOAD ALL DATA FROM SUPABASE ON APP START ───────────────────────────
+async function loadFromSupabase() {
+  if(!SUPABASE_READY) return;
+  showToast('Loading your data...');
+
+  // Load accounts
+  const accts = await DB.get('accounts');
+  if(accts && accts.length > 0) {
+    accounts = accts.map(a => ({id: String(a.id), name: a.name, balance: a.balance, type: a.type, _dbid: a.id}));
+    renderAccounts();
+  }
+
+  // Load networth history
+  const nwData = await DB.get('networth_history');
+  if(nwData && nwData.length > 0) {
+    nwHistory = nwData.map(r => r.net_worth);
+    nwMonths  = nwData.map(r => r.month);
+    nwChart.data.labels = nwMonths;
+    nwChart.data.datasets[0].data = nwHistory;
+    nwChart.update();
+  }
+
+  // Load fitness logs — rebuild counts per activity
+  const fitLogs = await DB.get('fitness_logs');
+  if(fitLogs && fitLogs.length > 0) {
+    // Reset counts for current month
+    const now = new Date();
+    const thisMonth = now.getFullYear()+'-'+(String(now.getMonth()+1).padStart(2,'0'));
+    const keys = ['run','gym','swim','cycle','ocr'];
+    keys.forEach(k => fitnessData[k] = 0);
+    fitLogs.forEach(log => {
+      if(log.date && log.date.startsWith(thisMonth)) {
+        const actKey = log.activity ? log.activity.toLowerCase() : '';
+        if(fitnessData.hasOwnProperty(actKey)) fitnessData[actKey]++;
+      }
+    });
+    keys.forEach(k => {
+      const el = document.getElementById('cnt-'+k);
+      if(el) el.textContent = fitnessData[k]+' this month';
+    });
+    refreshFitnessCharts();
+    // Store logs for today display
+    const today = new Date().toISOString().split('T')[0];
+    todaysLogs = fitLogs
+      .filter(l => l.date === today)
+      .map(l => ({act: l.activity.toLowerCase(), label: l.activity, detail: l.gym_type, distance: l.distance ? l.distance+'km' : '', pace: l.pace ? l.pace+'/km' : '', time: l.duration ? l.duration+'min' : '', hr: l.heart_rate ? l.heart_rate+'bpm' : '', obstacles: l.obstacles ? l.obstacles+' obstacles' : '', notes: l.notes}));
+  }
+
+  // Load sleep logs — last 7 entries
+  const sleepLogs = await DB.get('sleep_logs', '&limit=7');
+  if(sleepLogs && sleepLogs.length > 0) {
+    const recent = sleepLogs.slice(-7);
+    sleepData = recent.map(r => r.hours_slept);
+    while(sleepData.length < 7) sleepData.unshift(0);
+    sleepChart.data.datasets[0].data = sleepData;
+    sleepChart.data.datasets[0].backgroundColor = sleepData.map(h => h>=7 ? '#1D9E75' : '#EF9F27');
+    sleepChart.update();
+    updateSleepStats();
+  }
+
+  // Load content logs — last 4 weeks
+  const contentData = await DB.get('content_logs', '&limit=4');
+  if(contentData && contentData.length > 0) {
+    const recent = contentData.slice(-4);
+    contentTT = recent.map(r => r.tiktok_posts || 0);
+    contentYT = recent.map(r => r.youtube_posts || 0);
+    while(contentTT.length < 4){ contentTT.unshift(0); contentYT.unshift(0); }
+    contentChart.data.datasets[0].data = contentTT;
+    contentChart.data.datasets[1].data = contentYT;
+    contentChart.update();
+    updateContentMetrics();
+  }
+
+  showToast('Data loaded!');
+}
+
+// ── OVERRIDE saveState TO ALSO PUSH TO SUPABASE ──────────────────────────────
+// We wrap the original saveState so LocalStorage still works as backup
+const _origSaveState = saveState;
+
+async function saveActivityToSupabase(entry) {
+  if(!SUPABASE_READY) return;
+  const today = new Date().toISOString().split('T')[0];
+  await DB.post('fitness_logs', {
+    date: today,
+    activity: entry.label,
+    distance: entry.distance ? parseFloat(entry.distance) : null,
+    pace: entry.pace ? entry.pace.replace('/km','') : null,
+    duration: entry.time ? parseInt(entry.time) : null,
+    heart_rate: entry.hr ? parseInt(entry.hr) : null,
+    gym_type: entry.detail || null,
+    obstacles: entry.obstacles ? parseInt(entry.obstacles) : null,
+    notes: entry.notes || null
+  });
+}
+
+async function saveSleepToSupabase() {
+  if(!SUPABASE_READY) return;
+  const today = new Date().toISOString().split('T')[0];
+  const hrs = sleepData[sleepData.length-1];
+  const bed = document.getElementById('sleep-time').value;
+  const wake = document.getElementById('wake-time').value;
+  await DB.post('sleep_logs', {date: today, bedtime: bed, wake_time: wake, hours_slept: hrs});
+}
+
+async function saveContentToSupabase() {
+  if(!SUPABASE_READY) return;
+  const monday = new Date();
+  monday.setDate(monday.getDate() - monday.getDay() + 1);
+  const weekStart = monday.toISOString().split('T')[0];
+  // Check if this week already exists and update, otherwise insert
+  const existing = await DB.query('content_logs','GET',null,`?week_start=eq.${weekStart}`);
+  if(existing && existing.length > 0) {
+    await DB.patch('content_logs', existing[0].id, {tiktok_posts: contentTT[3], youtube_posts: contentYT[3]});
+  } else {
+    await DB.post('content_logs', {week_start: weekStart, tiktok_posts: contentTT[3], youtube_posts: contentYT[3]});
+  }
+}
+
+async function saveAccountsToSupabase() {
+  if(!SUPABASE_READY) return;
+  // Delete all and reinsert for simplicity
+  const existing = await DB.get('accounts');
+  if(existing) {
+    for(const a of existing) await DB.delete('accounts', a.id);
+  }
+  for(const a of accounts) {
+    await DB.post('accounts', {name: a.name, balance: a.balance, type: a.type});
+  }
+  // Save networth snapshot
+  const assets = accounts.filter(a=>a.type==='asset').reduce((s,a)=>s+a.balance,0);
+  const liabs  = accounts.filter(a=>a.type==='liability').reduce((s,a)=>s+a.balance,0);
+  const nw     = assets - liabs;
+  const month  = new Date().toLocaleString('en-US',{month:'short',year:'numeric'});
+  const existingNW = await DB.query('networth_history','GET',null,`?month=eq.${encodeURIComponent(month)}`);
+  if(existingNW && existingNW.length > 0) {
+    await DB.patch('networth_history', existingNW[0].id, {assets, liabilities: liabs, net_worth: nw});
+  } else {
+    await DB.post('networth_history', {month, assets, liabilities: liabs, net_worth: nw});
+  }
+}
+
+// ── PATCH EXISTING FUNCTIONS TO ALSO SAVE TO SUPABASE ────────────────────────
+const _origSaveActivityLog = saveActivityLog;
+saveActivityLog = async function() {
+  _origSaveActivityLog();
+  if(todaysLogs.length > 0) {
+    const last = todaysLogs[todaysLogs.length-1];
+    await saveActivityToSupabase(last);
+  }
+};
+
+const _origLogSleep = logSleep;
+logSleep = async function() {
+  _origLogSleep();
+  await saveSleepToSupabase();
+};
+
+const _origLogContent = logContent;
+logContent = async function() {
+  _origLogContent();
+  await saveContentToSupabase();
+};
+
+const _origAddAccount = addAccount;
+addAccount = async function() {
+  _origAddAccount();
+  await saveAccountsToSupabase();
+};
+
+const _origSaveEdit = saveEdit;
+saveEdit = async function(id) {
+  _origSaveEdit(id);
+  await saveAccountsToSupabase();
+};
+
+const _origDeleteAcct = deleteAcct;
+deleteAcct = async function(id) {
+  if(!confirm('Delete this account?')) return;
+  accounts = accounts.filter(a=>a.id!==id);
+  renderAccounts(); saveState(); showToast('Account removed');
+  await saveAccountsToSupabase();
+};
+
+// ── KICK OFF: LOAD DATA WHEN APP STARTS ──────────────────────────────────────
+window.addEventListener('load', () => {
+  if(SUPABASE_READY) {
+    loadFromSupabase();
+  } else {
+    showToast('Add your Supabase keys to enable cloud sync');
+  }
+});
+
+</script>
+</body>
+</html>
