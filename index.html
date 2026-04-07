@@ -8,758 +8,1062 @@
 <meta name="apple-mobile-web-app-title" content="My Tracker">
 <title>My Tracker</title>
 <style>
-:root {
-  --color-background-primary: #ffffff;
-  --color-background-secondary: #f1efe8;
-  --color-text-primary: #2C2C2A;
-  --color-text-secondary: #888780;
-  --color-border-tertiary: rgba(0,0,0,0.12);
-  --color-border-secondary: rgba(0,0,0,0.22);
-  --color-border-primary: rgba(0,0,0,0.35);
-  --border-radius-md: 8px;
-  --border-radius-lg: 12px;
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+:root{
+  --bg:#ffffff;--bg2:#f1efe8;--bg3:#e8e6de;
+  --txt:#2C2C2A;--txt2:#888780;--txt3:#b4b2a9;
+  --brd:rgba(0,0,0,0.12);--brd2:rgba(0,0,0,0.22);--brd3:rgba(0,0,0,0.35);
+  --rad:8px;--radlg:12px;
+  --blue:#378ADD;--blue-d:#185FA5;--blue-l:#E6F1FB;
+  --green:#1D9E75;--green-d:#0F6E56;--green-l:#E1F5EE;
+  --amber:#EF9F27;--amber-d:#854F0B;--amber-l:#FAEEDA;
+  --red:#E24B4A;--red-d:#A32D2D;--red-l:#FCEBEB;
+  --pink:#D4537E;--purple:#7F77DD;--teal:#5DCAA5;--orange:#D85A30;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background-primary: #1c1c1a;
-    --color-background-secondary: #2a2a28;
-    --color-text-primary: #f0ede6;
-    --color-text-secondary: #888780;
-    --color-border-tertiary: rgba(255,255,255,0.10);
-    --color-border-secondary: rgba(255,255,255,0.20);
-    --color-border-primary: rgba(255,255,255,0.35);
-  }
+@media(prefers-color-scheme:dark){
+  :root{--bg:#1c1c1a;--bg2:#2a2a28;--bg3:#333330;--txt:#f0ede6;--txt2:#888780;--brd:rgba(255,255,255,0.10);--brd2:rgba(255,255,255,0.20);--brd3:rgba(255,255,255,0.35);}
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--color-background-primary);font-family:var(--font-sans);color:var(--color-text-primary)}
-.app{max-width:480px;margin:0 auto;padding:0 0 3rem}
+body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--txt);min-height:100vh}
+/* AUTH */
+.auth-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1rem}
+.auth-card{background:var(--bg);border:0.5px solid var(--brd2);border-radius:var(--radlg);padding:2rem 1.5rem;width:100%;max-width:360px}
+.auth-title{font-size:22px;font-weight:500;margin-bottom:4px}
+.auth-sub{font-size:13px;color:var(--txt2);margin-bottom:1.5rem}
+.auth-tabs{display:flex;gap:6px;margin-bottom:1.25rem}
+.auth-tab{flex:1;padding:8px;border-radius:99px;border:0.5px solid var(--brd2);background:transparent;font-size:13px;cursor:pointer;color:var(--txt2)}
+.auth-tab.active{background:var(--txt);color:var(--bg);border-color:transparent}
+.auth-err{font-size:12px;color:var(--red-d);background:var(--red-l);padding:8px 10px;border-radius:var(--rad);margin-bottom:10px;display:none}
+.auth-err.show{display:block}
+/* APP */
+.app{max-width:480px;margin:0 auto;padding:0 0 4rem;display:none}
+.app.visible{display:block}
 .top-bar{padding:1.25rem 1rem 0;display:flex;align-items:center;justify-content:space-between}
-.top-bar h1{font-size:20px;font-weight:500;color:var(--color-text-primary)}
-.top-bar span{font-size:12px;color:var(--color-text-secondary)}
+.top-bar h1{font-size:20px;font-weight:500}
+.top-bar-right{display:flex;align-items:center;gap:8px}
+.top-bar-right span{font-size:12px;color:var(--txt2)}
+.signout-btn{font-size:11px;padding:4px 10px;border-radius:99px;border:0.5px solid var(--brd2);background:transparent;cursor:pointer;color:var(--txt2)}
 .tab-row{display:flex;gap:6px;padding:1rem 1rem 0;overflow-x:auto;scrollbar-width:none}
 .tab-row::-webkit-scrollbar{display:none}
-.tab-btn{flex-shrink:0;padding:6px 14px;border-radius:99px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);font-size:13px;cursor:pointer;color:var(--color-text-secondary);transition:all 0.15s}
-.tab-btn.active{background:var(--color-text-primary);color:var(--color-background-primary);border-color:transparent}
+.tab-btn{flex-shrink:0;padding:6px 14px;border-radius:99px;border:0.5px solid var(--brd2);background:var(--bg);font-size:13px;cursor:pointer;color:var(--txt2);transition:all .15s}
+.tab-btn.active{background:var(--txt);color:var(--bg);border-color:transparent}
 .section{display:none;padding:1rem;flex-direction:column;gap:12px}
 .section.visible{display:flex}
-.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem}
-.card-title{font-size:13px;font-weight:500;color:var(--color-text-secondary);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.05em}
+.card{background:var(--bg);border:0.5px solid var(--brd);border-radius:var(--radlg);padding:1rem 1.25rem}
+.card-title{font-size:13px;font-weight:500;color:var(--txt2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em}
 .metric-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px}
-.metric-label{font-size:11px;color:var(--color-text-secondary);margin-bottom:4px}
-.metric-value{font-size:22px;font-weight:500;color:var(--color-text-primary)}
-.metric-sub{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
-.act-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.act-btn{padding:12px 8px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);cursor:pointer;font-size:13px;font-weight:500;color:var(--color-text-primary);display:flex;flex-direction:column;align-items:center;gap:4px;transition:all 0.15s;width:100%}
-.act-btn:active{transform:scale(0.97)}
-.act-btn .act-icon{font-size:20px}
-.act-btn .act-count{font-size:11px;color:var(--color-text-secondary)}
-.act-btn.selected{border-color:#185FA5;background:#E6F1FB}
-.act-btn.selected .act-count{color:#185FA5}
-.form-panel{margin-top:12px;padding-top:12px;border-top:0.5px solid var(--color-border-tertiary)}
-.form-panel-title{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:10px}
-.inp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.metric{background:var(--bg2);border-radius:var(--rad);padding:12px}
+.metric-label{font-size:11px;color:var(--txt2);margin-bottom:4px}
+.metric-value{font-size:22px;font-weight:500}
+.metric-sub{font-size:11px;color:var(--txt2);margin-top:2px}
+/* INPUTS */
 .inp-group{display:flex;flex-direction:column;gap:4px}
-.inp-group label{font-size:12px;color:var(--color-text-secondary)}
-.inp-group input,.inp-group select,.inp-group textarea{border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);padding:8px 10px;font-size:14px;color:var(--color-text-primary);width:100%;font-family:var(--font-sans)}
-.inp-group textarea{resize:vertical;min-height:70px;line-height:1.5}
-.gym-types{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
-.gym-type-btn{padding:5px 12px;border-radius:99px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);font-size:12px;cursor:pointer;color:var(--color-text-secondary);transition:all 0.12s}
-.gym-type-btn.active{background:var(--color-text-primary);color:var(--color-background-primary);border-color:transparent}
-.log-btn{width:100%;padding:11px;border-radius:var(--border-radius-md);border:none;background:var(--color-text-primary);color:var(--color-background-primary);font-size:14px;font-weight:500;cursor:pointer;transition:opacity 0.15s;margin-top:10px}
-.log-btn:active{opacity:0.8}
-.log-btn.secondary{background:var(--color-background-secondary);color:var(--color-text-primary);border:0.5px solid var(--color-border-secondary)}
-.custom-btn{width:100%;padding:10px;border-radius:var(--border-radius-md);border:0.5px dashed var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);font-size:13px;cursor:pointer;text-align:center;transition:all 0.15s}
-.custom-btn:hover{border-color:var(--color-border-primary);color:var(--color-text-primary)}
+.inp-group label{font-size:12px;color:var(--txt2)}
+input,select,textarea{border-radius:var(--rad);border:0.5px solid var(--brd2);background:var(--bg);padding:8px 10px;font-size:14px;color:var(--txt);width:100%;font-family:inherit}
+textarea{resize:vertical;min-height:60px;line-height:1.5}
+.inp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.inp-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+/* BUTTONS */
+.btn{width:100%;padding:11px;border-radius:var(--rad);border:none;background:var(--txt);color:var(--bg);font-size:14px;font-weight:500;cursor:pointer;transition:opacity .15s;margin-top:8px}
+.btn:active{opacity:.8}
+.btn.sec{background:var(--bg2);color:var(--txt);border:0.5px solid var(--brd2)}
+.btn.sm{padding:7px 14px;width:auto;font-size:13px;margin-top:0}
+.btn.danger{background:var(--red-l);color:var(--red-d);border:0.5px solid var(--red)}
+.dash-btn{padding:10px;border-radius:var(--rad);border:0.5px dashed var(--brd2);background:transparent;color:var(--txt2);font-size:13px;cursor:pointer;text-align:center;width:100%;margin-top:8px}
+.icon-btn{width:28px;height:28px;border-radius:var(--rad);border:0.5px solid var(--brd2);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--txt2)}
+.icon-btn.danger-btn:hover{background:var(--red-l);border-color:var(--red);color:var(--red-d)}
+/* FITNESS */
+.act-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.act-btn{padding:12px 8px;border-radius:var(--rad);border:0.5px solid var(--brd2);background:var(--bg);cursor:pointer;font-size:13px;font-weight:500;color:var(--txt);display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;transition:all .15s}
+.act-btn.sel{border-color:var(--blue-d);background:var(--blue-l)}
+.act-count{font-size:11px;color:var(--txt2)}
+.act-btn.sel .act-count{color:var(--blue-d)}
+.gym-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.pill{padding:5px 12px;border-radius:99px;border:0.5px solid var(--brd2);background:var(--bg);font-size:12px;cursor:pointer;color:var(--txt2)}
+.pill.active{background:var(--txt);color:var(--bg);border-color:transparent}
+.form-panel{margin-top:12px;padding-top:12px;border-top:0.5px solid var(--brd)}
+/* LOGS LIST */
+.logs-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.log-item{padding:10px 12px;border-radius:var(--rad);background:var(--bg2);border:0.5px solid var(--brd);font-size:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.log-item-main{flex:1;min-width:0}
+.log-item-date{font-size:11px;color:var(--txt2);margin-bottom:2px}
+.log-item-detail{color:var(--txt);font-weight:500}
+.log-item-meta{color:var(--txt2);margin-top:2px}
+.log-item-actions{display:flex;gap:4px;flex-shrink:0}
+/* CALENDAR */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:8px}
+.cal-hdr{text-align:center;font-size:10px;color:var(--txt2);padding:4px 0;font-weight:500}
+.cal-day{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--txt2);background:var(--bg2);position:relative;cursor:default}
+.cal-day.empty{background:transparent}
+.cal-day.today{border:1.5px solid var(--blue);color:var(--blue);font-weight:500}
+.cal-day.has-log{background:var(--blue);color:#fff;font-weight:500}
+.cal-day.has-log.today{background:var(--blue-d)}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cal-nav-btn{padding:4px 10px;border-radius:99px;border:0.5px solid var(--brd2);background:transparent;font-size:13px;cursor:pointer;color:var(--txt)}
+.cal-month-label{font-size:14px;font-weight:500}
+/* FILTER BAR */
+.filter-bar{display:flex;gap:6px;margin-bottom:10px;align-items:center}
+.filter-bar label{font-size:12px;color:var(--txt2);flex-shrink:0}
+.filter-bar select{flex:1;padding:6px 8px;font-size:13px}
+/* CHART */
 .chart-wrap{position:relative;width:100%}
-.legend-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;font-size:12px;color:var(--color-text-secondary)}
-.leg-item{display:flex;align-items:center;gap:4px}
+.legend-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;font-size:12px;color:var(--txt2)}
 .leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
-.time-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.num-inp{border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);padding:8px 10px;font-size:15px;color:var(--color-text-primary);width:100%}
-.creator-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.logged-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
-.logged-item{padding:8px 10px;border-radius:var(--border-radius-md);background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);font-size:12px;color:var(--color-text-secondary)}
-.logged-item strong{color:var(--color-text-primary);font-weight:500}
-.custom-act-form{padding:10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-secondary);display:none;flex-direction:column;gap:8px;margin-top:4px}
-.custom-act-form.open{display:flex}
+/* ACCT GALLERY */
 .acct-gallery{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.acct-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;display:flex;flex-direction:column;gap:6px;position:relative;min-width:0}
-.acct-card-type{font-size:10px;font-weight:500;padding:2px 8px;border-radius:99px;align-self:flex-start}
-.type-asset{background:#E6F1FB;color:#185FA5}
-.type-liab{background:#FCEBEB;color:#A32D2D}
-.acct-card-name{font-size:13px;font-weight:500;color:var(--color-text-primary);line-height:1.3;word-break:break-word}
-.acct-card-balance{font-size:18px;font-weight:500;color:var(--color-text-primary);margin-top:2px}
-.acct-card-balance.liab-bal{color:#A32D2D}
-.acct-card-actions{display:flex;gap:4px;margin-top:2px}
-.icon-btn{width:26px;height:26px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--color-text-secondary);transition:all 0.12s}
-.icon-btn:hover{border-color:var(--color-border-primary)}
-.icon-btn.danger:hover{background:#FCEBEB;border-color:#F09595;color:#A32D2D}
-.acct-card.editing-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary)}
-.add-acct-form-inner{display:flex;flex-direction:column;gap:8px}
-.add-acct-form-inner input,.add-acct-form-inner select{border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);padding:8px 10px;font-size:14px;color:var(--color-text-primary);width:100%;font-family:var(--font-sans)}
-.acct-form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--color-text-primary);color:var(--color-background-primary);padding:7px 18px;border-radius:99px;font-size:13px;opacity:0;pointer-events:none;transition:opacity 0.2s;z-index:999;white-space:nowrap}
+.acct-card{background:var(--bg2);border-radius:var(--rad);padding:12px;display:flex;flex-direction:column;gap:5px;min-width:0}
+.acct-card.edit-card{background:var(--bg);border:0.5px solid var(--brd2);grid-column:1/-1}
+.badge{font-size:10px;font-weight:500;padding:2px 8px;border-radius:99px;align-self:flex-start}
+.badge.asset{background:var(--blue-l);color:var(--blue-d)}
+.badge.liab{background:var(--red-l);color:var(--red-d)}
+.acct-name{font-size:13px;font-weight:500;line-height:1.3;word-break:break-word}
+.acct-bal{font-size:18px;font-weight:500}
+.acct-bal.liab-col{color:var(--red-d)}
+.acct-actions{display:flex;gap:4px}
+/* MODAL OVERLAY */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-end;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg);border-radius:var(--radlg) var(--radlg) 0 0;padding:1.5rem 1rem 2rem;width:100%;max-width:480px;display:flex;flex-direction:column;gap:10px;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:500;margin-bottom:4px}
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--txt);color:var(--bg);padding:7px 18px;border-radius:99px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:999;white-space:nowrap}
 .toast.show{opacity:1}
+.divider{height:0.5px;background:var(--brd);margin:4px 0}
+.empty-state{text-align:center;padding:1.5rem 1rem;color:var(--txt2);font-size:13px}
+.sleep-goal-row{display:flex;align-items:center;gap:8px;margin-top:4px}
+.sleep-goal-row input{width:60px;text-align:center;padding:6px 8px;font-size:14px}
 </style>
 </head>
 <body>
 
-<div class="app">
-<div class="top-bar">
-  <h1>My Tracker</h1>
-  <span id="today-date"></span>
-</div>
-
-<div class="tab-row">
-  <button class="tab-btn active" onclick="switchTab('fitness',this)">Fitness</button>
-  <button class="tab-btn" onclick="switchTab('sleep',this)">Sleep</button>
-  <button class="tab-btn" onclick="switchTab('content',this)">Creator</button>
-  <button class="tab-btn" onclick="switchTab('finance',this)">Finance</button>
-</div>
-
-<!-- FITNESS -->
-<div class="section visible" id="tab-fitness">
-  <div class="card">
-    <div class="card-title">Select activity to log</div>
-    <div class="act-grid">
-      <button class="act-btn" id="abt-run" onclick="selectActivity('run',this)"><span class="act-icon" style="font-size:20px">🏃</span><span>Run</span><span class="act-count" id="cnt-run">0 this month</span></button>
-      <button class="act-btn" id="abt-gym" onclick="selectActivity('gym',this)"><span class="act-icon" style="font-size:20px">🏋️</span><span>Gym</span><span class="act-count" id="cnt-gym">0 this month</span></button>
-      <button class="act-btn" id="abt-swim" onclick="selectActivity('swim',this)"><span class="act-icon" style="font-size:20px">🏊</span><span>Swim</span><span class="act-count" id="cnt-swim">0 this month</span></button>
-      <button class="act-btn" id="abt-cycle" onclick="selectActivity('cycle',this)"><span class="act-icon" style="font-size:20px">🚴</span><span>Cycle</span><span class="act-count" id="cnt-cycle">0 this month</span></button>
-      <button class="act-btn" id="abt-ocr" onclick="selectActivity('ocr',this)" style="grid-column:1/-1"><span class="act-icon" style="font-size:20px">🧗</span><span>Obstacle Course</span><span class="act-count" id="cnt-ocr">0 this month</span></button>
+<!-- AUTH SCREEN -->
+<div class="auth-wrap" id="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-title">My Tracker</div>
+    <div class="auth-sub">Sign in to access your personal dashboard</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="showAuthTab('login',this)">Sign in</button>
+      <button class="auth-tab" onclick="showAuthTab('register',this)">Register</button>
     </div>
-    <div id="custom-activities"></div>
-    <div class="custom-act-form" id="custom-act-form">
-      <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Add custom activity</div>
-      <input type="text" id="custom-act-name" placeholder="e.g. Rowing, Yoga, Boxing..." style="border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);padding:8px 10px;font-size:14px;color:var(--color-text-primary);width:100%;font-family:var(--font-sans)">
-      <div style="display:flex;gap:8px"><button class="log-btn secondary" onclick="closeCustomForm()" style="margin-top:0">Cancel</button><button class="log-btn" onclick="addCustomActivity()" style="margin-top:0">Add activity</button></div>
+    <div class="auth-err" id="auth-err"></div>
+    <div class="inp-group" style="margin-bottom:8px">
+      <label>Email</label>
+      <input type="email" id="auth-email" placeholder="you@email.com" autocomplete="email">
     </div>
-    <button class="custom-btn" id="add-custom-btn" onclick="openCustomForm()" style="margin-top:8px">+ Add custom activity</button>
-    <div class="form-panel" id="activity-form" style="display:none">
-      <div class="form-panel-title" id="form-title">Log run</div>
-      <div id="form-fields"></div>
-      <div class="logged-list" id="todays-logs"></div>
-      <button class="log-btn" onclick="saveActivityLog()">Save entry</button>
+    <div class="inp-group" style="margin-bottom:4px">
+      <label>Password</label>
+      <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password">
     </div>
-  </div>
-  <div class="card">
-    <div class="card-title">This vs last month</div>
-    <div class="legend-row"><span class="leg-item"><span class="leg-dot" style="background:#378ADD"></span>This month</span><span class="leg-item"><span class="leg-dot" style="background:#B5D4F4"></span>Last month</span></div>
-    <div class="chart-wrap" style="height:220px"><canvas id="fitnessBarChart"></canvas></div>
-  </div>
-  <div class="card">
-    <div class="card-title">Activity breakdown</div>
-    <div class="chart-wrap" style="height:220px"><canvas id="fitnessPieChart"></canvas></div>
-    <div class="legend-row" id="pie-legend" style="margin-top:12px;margin-bottom:0;justify-content:center"></div>
+    <button class="btn" id="auth-btn" onclick="doAuth()">Sign in</button>
+    <p style="font-size:11px;color:var(--txt2);text-align:center;margin-top:12px" id="auth-toggle-hint">Don't have an account? Click Register above.</p>
   </div>
 </div>
 
-<!-- SLEEP -->
-<div class="section" id="tab-sleep">
-  <div class="card">
-    <div class="card-title">Log last night's sleep</div>
-    <div class="time-inputs">
-      <div class="inp-group"><label>Bedtime</label><input type="time" id="sleep-time" value="22:30"></div>
-      <div class="inp-group"><label>Wake up</label><input type="time" id="wake-time" value="06:30"></div>
-    </div>
-    <button class="log-btn" onclick="logSleep()">Log sleep</button>
-  </div>
-  <div class="card">
-    <div class="metric-row">
-      <div class="metric"><div class="metric-label">Avg this week</div><div class="metric-value" id="avg-sleep">0h</div><div class="metric-sub">Goal: 7h</div></div>
-      <div class="metric"><div class="metric-label">Last night</div><div class="metric-value" id="last-sleep">8.0h</div><div class="metric-sub" id="sleep-quality">On target</div></div>
+<!-- MAIN APP -->
+<div class="app" id="main-app">
+  <div class="top-bar">
+    <h1>My Tracker</h1>
+    <div class="top-bar-right">
+      <span id="today-date"></span>
+      <button class="signout-btn" onclick="signOut()">Sign out</button>
     </div>
   </div>
-  <div class="card">
-    <div class="card-title">Last 7 nights</div>
-    <div class="chart-wrap" style="height:200px"><canvas id="sleepBarChart"></canvas></div>
-  </div>
-</div>
 
-<!-- CONTENT -->
-<div class="section" id="tab-content">
-  <div class="card">
-    <div class="card-title">Log posts this week</div>
-    <div class="creator-inputs">
-      <div class="inp-group"><label>TikTok posts</label><input type="number" class="num-inp" id="tiktok-inp" min="0" value="0"></div>
-      <div class="inp-group"><label>YouTube posts</label><input type="number" class="num-inp" id="youtube-inp" min="0" value="0"></div>
-    </div>
-    <button class="log-btn" onclick="logContent()">Log posts</button>
+  <div class="tab-row">
+    <button class="tab-btn active" onclick="switchTab('fitness',this)">Fitness</button>
+    <button class="tab-btn" onclick="switchTab('sleep',this)">Sleep</button>
+    <button class="tab-btn" onclick="switchTab('content',this)">Creator</button>
+    <button class="tab-btn" onclick="switchTab('finance',this)">Finance</button>
   </div>
-  <div class="card">
-    <div class="metric-row">
-      <div class="metric"><div class="metric-label">TikTok total</div><div class="metric-value" id="tt-total">0</div><div class="metric-sub">last 4 weeks</div></div>
-      <div class="metric"><div class="metric-label">YouTube total</div><div class="metric-value" id="yt-total">0</div><div class="metric-sub">last 4 weeks</div></div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title">Posts per week</div>
-    <div class="legend-row"><span class="leg-item"><span class="leg-dot" style="background:#D4537E"></span>TikTok</span><span class="leg-item"><span class="leg-dot" style="background:#378ADD"></span>YouTube</span></div>
-    <div class="chart-wrap" style="height:220px"><canvas id="contentBarChart"></canvas></div>
-  </div>
-</div>
 
-<!-- FINANCE -->
-<div class="section" id="tab-finance">
-  <div class="card">
-    <div class="card-title">Net worth summary</div>
-    <div class="metric-row">
-      <div class="metric"><div class="metric-label">Net worth</div><div class="metric-value" id="nw-value">₱0</div><div class="metric-sub" id="nw-change">+₱0 vs last entry</div></div>
-      <div class="metric"><div class="metric-label">Total assets</div><div class="metric-value" id="asset-total">₱0</div><div class="metric-sub" id="liab-total">Liabilities: ₱0</div></div>
+  <!-- FITNESS TAB -->
+  <div class="section visible" id="tab-fitness">
+    <div class="card">
+      <div class="card-title">Log activity</div>
+      <div class="act-grid" id="act-grid">
+        <button class="act-btn" id="abt-run" onclick="selectAct('run',this)"><span style="font-size:20px">🏃</span><span>Run</span><span class="act-count" id="cnt-run">0 this month</span></button>
+        <button class="act-btn" id="abt-gym" onclick="selectAct('gym',this)"><span style="font-size:20px">🏋️</span><span>Gym</span><span class="act-count" id="cnt-gym">0 this month</span></button>
+        <button class="act-btn" id="abt-swim" onclick="selectAct('swim',this)"><span style="font-size:20px">🏊</span><span>Swim</span><span class="act-count" id="cnt-swim">0 this month</span></button>
+        <button class="act-btn" id="abt-cycle" onclick="selectAct('cycle',this)"><span style="font-size:20px">🚴</span><span>Cycle</span><span class="act-count" id="cnt-cycle">0 this month</span></button>
+        <button class="act-btn" id="abt-ocr" onclick="selectAct('ocr',this)" style="grid-column:1/-1"><span style="font-size:20px">🧗</span><span>Obstacle Course</span><span class="act-count" id="cnt-ocr">0 this month</span></button>
+      </div>
+      <div id="custom-act-btns"></div>
+      <div id="custom-act-form" style="display:none;margin-top:8px;padding:10px;border:0.5px solid var(--brd2);border-radius:var(--rad);background:var(--bg2);flex-direction:column;gap:8px">
+        <div style="font-size:13px;font-weight:500">New custom activity</div>
+        <input type="text" id="custom-act-name" placeholder="e.g. Rowing, Yoga, Boxing...">
+        <div style="display:flex;gap:8px"><button class="btn sec sm" onclick="closeCustomActForm()">Cancel</button><button class="btn sm" onclick="saveCustomAct()">Add</button></div>
+      </div>
+      <button class="dash-btn" id="add-act-btn" onclick="openCustomActForm()">+ Add custom activity</button>
+
+      <div class="form-panel" id="act-form-panel" style="display:none">
+        <div style="font-size:13px;font-weight:500;margin-bottom:10px" id="act-form-title">Log run</div>
+        <div id="act-form-fields"></div>
+        <button class="btn" onclick="saveActivityLog()">Save entry</button>
+      </div>
+    </div>
+
+    <!-- Recent logs for selected activity -->
+    <div class="card" id="recent-logs-card" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div class="card-title" style="margin-bottom:0" id="recent-logs-title">Recent runs</div>
+      </div>
+      <div id="recent-logs-list"><div class="empty-state">No logs yet</div></div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="card">
+      <div class="card-title">Monthly calendar</div>
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="calMove(-1)">&#8592;</button>
+        <span class="cal-month-label" id="cal-label"></span>
+        <button class="cal-nav-btn" onclick="calMove(1)">&#8594;</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div style="display:flex;gap:12px;margin-top:10px;font-size:11px;color:var(--txt2)">
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:3px;background:var(--blue);display:inline-block"></span>Worked out</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:3px;border:1.5px solid var(--blue);display:inline-block"></span>Today</span>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="card">
+      <div class="card-title">This vs last month</div>
+      <div class="legend-row"><span style="display:flex;align-items:center;gap:4px"><span class="leg-dot" style="background:#378ADD"></span>This month</span><span style="display:flex;align-items:center;gap:4px"><span class="leg-dot" style="background:#B5D4F4"></span>Last month</span></div>
+      <div class="chart-wrap" style="height:220px"><canvas id="fitnessBarChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Activity breakdown</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="fitnessPieChart"></canvas></div>
+      <div class="legend-row" id="pie-legend" style="margin-top:12px;margin-bottom:0;justify-content:center"></div>
     </div>
   </div>
-  <div class="card">
-    <div class="card-title">Accounts</div>
-    <div class="acct-gallery" id="acct-gallery"></div>
-    <div id="add-acct-form-wrap" style="margin-top:8px;display:none">
-      <div style="padding:12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-secondary)">
-        <div class="add-acct-form-inner">
-          <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px">New account</div>
-          <input type="text" id="new-acct-name" placeholder="e.g. Chase Checking, Fidelity 401k...">
-          <div class="acct-form-row">
-            <div class="inp-group"><label style="font-size:12px;color:var(--color-text-secondary)">Balance (₱)</label><input type="number" id="new-acct-balance" placeholder="0" min="0"></div>
-            <div class="inp-group"><label style="font-size:12px;color:var(--color-text-secondary)">Type</label>
-              <select id="new-acct-type"><option value="asset">Asset</option><option value="liability">Liability</option></select>
-            </div>
-          </div>
-          <div style="display:flex;gap:8px">
-            <button class="log-btn secondary" onclick="closeAddAcct()" style="margin-top:0">Cancel</button>
-            <button class="log-btn" onclick="addAccount()" style="margin-top:0">Add account</button>
+
+  <!-- SLEEP TAB -->
+  <div class="section" id="tab-sleep">
+    <div class="card">
+      <div class="card-title">Log sleep</div>
+      <div class="inp-grid" style="margin-bottom:8px">
+        <div class="inp-group"><label>Date</label><input type="date" id="sleep-date"></div>
+        <div class="inp-group"><label>Bedtime</label><input type="time" id="sleep-time" value="22:30"></div>
+      </div>
+      <div class="inp-grid">
+        <div class="inp-group"><label>Wake up</label><input type="time" id="wake-time" value="06:30"></div>
+        <div class="inp-group"><label>Notes (optional)</label><input type="text" id="sleep-notes" placeholder="e.g. restless"></div>
+      </div>
+      <button class="btn" onclick="logSleep()">Log sleep</button>
+    </div>
+
+    <div class="card">
+      <div class="metric-row">
+        <div class="metric">
+          <div class="metric-label">Avg (filtered range)</div>
+          <div class="metric-value" id="avg-sleep">—</div>
+          <div class="metric-sub" id="sleep-vs-goal">Goal: 8h</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Sleep goal</div>
+          <div class="sleep-goal-row">
+            <input type="number" id="sleep-goal-inp" value="8" min="1" max="12" step="0.5" style="width:60px;text-align:center">
+            <span style="font-size:13px;color:var(--txt2)">hrs</span>
+            <button class="btn sm sec" onclick="saveSleepGoal()" style="flex:1">Save</button>
           </div>
         </div>
       </div>
     </div>
-    <button class="custom-btn" id="add-acct-btn" onclick="openAddAcct()" style="margin-top:10px">+ Add account</button>
+
+    <div class="card">
+      <div class="filter-bar">
+        <label>View:</label>
+        <select id="sleep-filter" onchange="renderSleepChart()">
+          <option value="7">Last 7 days</option>
+          <option value="week">Last week</option>
+          <option value="30">Last 30 days</option>
+        </select>
+      </div>
+      <div class="chart-wrap" style="height:220px"><canvas id="sleepBarChart"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Sleep log</div>
+      <div id="sleep-logs-list"><div class="empty-state">No logs yet</div></div>
+    </div>
   </div>
-  <div class="card">
-    <div class="card-title">Net worth growth</div>
-    <div class="chart-wrap" style="height:200px"><canvas id="nwBarChart"></canvas></div>
+
+  <!-- CONTENT TAB -->
+  <div class="section" id="tab-content">
+    <div class="card">
+      <div class="card-title">Log a post</div>
+      <div class="inp-grid" style="margin-bottom:8px">
+        <div class="inp-group"><label>Date</label><input type="date" id="content-date"></div>
+        <div class="inp-group"><label>Platform</label>
+          <select id="content-platform"><option value="TikTok">TikTok</option><option value="YouTube">YouTube</option></select>
+        </div>
+      </div>
+      <div class="inp-group" style="margin-bottom:8px"><label>Content title</label><input type="text" id="content-title" placeholder="e.g. My morning run vlog"></div>
+      <div class="inp-group" style="margin-bottom:8px"><label>Content segment / category</label><input type="text" id="content-segment" placeholder="e.g. Fitness, Lifestyle, Finance..."></div>
+      <button class="btn" onclick="logContent()">Log post</button>
+    </div>
+
+    <div class="card">
+      <div class="metric-row">
+        <div class="metric"><div class="metric-label">TikTok total</div><div class="metric-value" id="tt-total">0</div><div class="metric-sub" id="tt-range-lbl">this month</div></div>
+        <div class="metric"><div class="metric-label">YouTube total</div><div class="metric-value" id="yt-total">0</div><div class="metric-sub" id="yt-range-lbl">this month</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="filter-bar">
+        <label>View:</label>
+        <select id="content-filter" onchange="renderContentChart()">
+          <option value="week">Last week</option>
+          <option value="month">Last month</option>
+        </select>
+      </div>
+      <div class="legend-row"><span style="display:flex;align-items:center;gap:4px"><span class="leg-dot" style="background:#D4537E"></span>TikTok</span><span style="display:flex;align-items:center;gap:4px"><span class="leg-dot" style="background:#378ADD"></span>YouTube</span></div>
+      <div class="chart-wrap" style="height:220px"><canvas id="contentBarChart"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Recent posts</div>
+      <div id="content-logs-list"><div class="empty-state">No posts logged yet</div></div>
+    </div>
   </div>
-  <div class="card">
-    <div class="card-title">Asset breakdown</div>
-    <div class="chart-wrap" style="height:220px"><canvas id="assetPieChart"></canvas></div>
-    <div class="legend-row" id="asset-legend" style="margin-top:12px;margin-bottom:0;justify-content:center;flex-wrap:wrap"></div>
+
+  <!-- FINANCE TAB -->
+  <div class="section" id="tab-finance">
+    <div class="card">
+      <div class="card-title">Net worth summary</div>
+      <div class="metric-row">
+        <div class="metric"><div class="metric-label">Net worth</div><div class="metric-value" id="nw-value">₱0</div><div class="metric-sub" id="nw-change">—</div></div>
+        <div class="metric"><div class="metric-label">Total assets</div><div class="metric-value" id="asset-total">₱0</div><div class="metric-sub" id="liab-total">Liabilities: ₱0</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Accounts</div>
+      <div class="acct-gallery" id="acct-gallery"></div>
+      <div id="add-acct-wrap" style="display:none;margin-top:8px;padding:12px;border:0.5px solid var(--brd2);border-radius:var(--rad);background:var(--bg2)">
+        <div style="font-size:13px;font-weight:500;margin-bottom:8px">New account</div>
+        <div class="inp-group" style="margin-bottom:8px"><label>Account name</label><input type="text" id="new-acct-name" placeholder="e.g. BDO Savings, GCash..."></div>
+        <div class="inp-grid" style="margin-bottom:8px">
+          <div class="inp-group"><label>Balance (₱)</label><input type="number" id="new-acct-balance" placeholder="0" min="0"></div>
+          <div class="inp-group"><label>Type</label><select id="new-acct-type"><option value="asset">Asset</option><option value="liability">Liability</option></select></div>
+        </div>
+        <div style="display:flex;gap:8px"><button class="btn sec sm" onclick="closeAddAcct()">Cancel</button><button class="btn sm" onclick="addAccount()">Add account</button></div>
+      </div>
+      <button class="dash-btn" id="add-acct-btn" onclick="openAddAcct()">+ Add account</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Net worth growth</div>
+      <div class="filter-bar">
+        <label>View:</label>
+        <select id="nw-filter" onchange="renderNWChart()">
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+      </div>
+      <div class="chart-wrap" style="height:200px"><canvas id="nwBarChart"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Asset breakdown</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="assetPieChart"></canvas></div>
+      <div class="legend-row" id="asset-legend" style="margin-top:12px;margin-bottom:0;justify-content:center;flex-wrap:wrap"></div>
+    </div>
+  </div>
+</div><!-- end .app -->
+
+<!-- EDIT MODAL (reused for fitness/sleep/content) -->
+<div class="modal-bg" id="edit-modal">
+  <div class="modal">
+    <div class="modal-title" id="edit-modal-title">Edit entry</div>
+    <div id="edit-modal-body"></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn sec" onclick="closeEditModal()" style="margin-top:0">Cancel</button>
+      <button class="btn" id="edit-modal-save" style="margin-top:0">Save changes</button>
+    </div>
   </div>
 </div>
-
-</div><!-- end .app -->
 
 <div class="toast" id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CONFIG — replace with your own values
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const SUPABASE_URL = 'https://qzbrtjuesnuqtfjimaqi.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6YnJ0anVlc251cXRmamltYXFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0NjQwMjcsImV4cCI6MjA5MTA0MDAyN30.Kj5FYjE31_jJecL1INw6KqcdAMPKvzDjU_Pcs_Q0VsM';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
-const textMuted = '#888780';
-const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
-Chart.defaults.color = textMuted;
-Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
-Chart.defaults.font.size = 12;
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// GLOBAL STATE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let currentUser = null;
+let allFitnessLogs = [], allSleepLogs = [], allContentLogs = [], accounts = [], nwHistory = [];
+let customActivities = [];
+let selectedAct = null, selectedGymType = null;
+let calYear, calMonth;
+let sleepGoal = 8;
+let editingAcctId = null;
+let editModalSaveFn = null;
 
 const PIE_COLORS = ['#378ADD','#1D9E75','#EF9F27','#D85A30','#7F77DD','#D4537E','#639922','#E24B4A','#BA7517','#5DCAA5'];
+const isDark = matchMedia('(prefers-color-scheme:dark)').matches;
+const textMuted = '#888780';
+const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
 
-const baseBarOpts = {
-  responsive:true,maintainAspectRatio:false,
-  plugins:{legend:{display:false},tooltip:{boxRadius:3}},
-  scales:{
-    x:{grid:{display:false},border:{display:false},ticks:{color:textMuted}},
-    y:{grid:{color:gridColor},border:{display:false},ticks:{color:textMuted}}
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CHART INSTANCES
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Chart.defaults.color = textMuted;
+Chart.defaults.font.family = '-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif';
+Chart.defaults.font.size = 12;
+
+const baseOpts = {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{boxRadius:3}},scales:{x:{grid:{display:false},border:{display:false},ticks:{color:textMuted}},y:{grid:{color:gridColor},border:{display:false},ticks:{color:textMuted}}}};
+
+const fitnessBarChart = new Chart(document.getElementById('fitnessBarChart'),{type:'bar',data:{labels:[],datasets:[{label:'This month',data:[],backgroundColor:'#378ADD',borderRadius:4,barPercentage:0.7},{label:'Last month',data:[],backgroundColor:'#B5D4F4',borderRadius:4,barPercentage:0.7}]},options:baseOpts});
+const fitnessPieChart = new Chart(document.getElementById('fitnessPieChart'),{type:'pie',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{boxRadius:3}}}});
+const sleepBarChart   = new Chart(document.getElementById('sleepBarChart'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderRadius:4,barPercentage:0.7}]},options:{...baseOpts,scales:{...baseOpts.scales,y:{...baseOpts.scales.y,min:0,max:12,ticks:{color:textMuted,stepSize:2,callback:v=>v+'h'}}}}});
+const contentBarChart = new Chart(document.getElementById('contentBarChart'),{type:'bar',data:{labels:[],datasets:[{label:'TikTok',data:[],backgroundColor:'#D4537E',borderRadius:4,barPercentage:0.6},{label:'YouTube',data:[],backgroundColor:'#378ADD',borderRadius:4,barPercentage:0.6}]},options:{...baseOpts,scales:{...baseOpts.scales,y:{...baseOpts.scales.y,ticks:{color:textMuted,stepSize:1}}}}});
+const nwBarChart      = new Chart(document.getElementById('nwBarChart'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:'#378ADD',borderRadius:4,barPercentage:0.7}]},options:{...baseOpts,scales:{...baseOpts.scales,y:{...baseOpts.scales.y,ticks:{color:textMuted,callback:v=>'₱'+Math.round(v/1000)+'K'}}}}});
+const assetPieChart   = new Chart(document.getElementById('assetPieChart'),{type:'pie',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{boxRadius:3,callbacks:{label:ctx=>ctx.label+': ₱'+ctx.raw.toLocaleString()}}}}});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// AUTH
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let authMode = 'login';
+function showAuthTab(mode, btn){
+  authMode = mode;
+  document.querySelectorAll('.auth-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('auth-btn').textContent = mode==='login' ? 'Sign in' : 'Create account';
+  document.getElementById('auth-toggle-hint').textContent = mode==='login' ? "Don't have an account? Click Register above." : "Already have an account? Click Sign in above.";
+  document.getElementById('auth-err').classList.remove('show');
+}
+
+async function doAuth(){
+  const email = document.getElementById('auth-email').value.trim();
+  const pass  = document.getElementById('auth-password').value;
+  const errEl = document.getElementById('auth-err');
+  errEl.classList.remove('show');
+  if(!email || !pass){ errEl.textContent='Please enter email and password.'; errEl.classList.add('show'); return; }
+  let res;
+  if(authMode==='login'){
+    res = await sb.auth.signInWithPassword({email,password:pass});
+  } else {
+    res = await sb.auth.signUp({email,password:pass});
   }
-};
-
-// ── LOCALSTORAGE PERSISTENCE ──────────────────────────────────────────────────
-function saveState() {
-  try {
-    localStorage.setItem('tracker_fitness', JSON.stringify(fitnessData));
-    localStorage.setItem('tracker_fitness_last', JSON.stringify(fitnessLastMonth));
-    localStorage.setItem('tracker_custom_acts', JSON.stringify(customActivities));
-    localStorage.setItem('tracker_sleep', JSON.stringify(sleepData));
-    localStorage.setItem('tracker_content_tt', JSON.stringify(contentTT));
-    localStorage.setItem('tracker_content_yt', JSON.stringify(contentYT));
-    localStorage.setItem('tracker_accounts', JSON.stringify(accounts));
-    localStorage.setItem('tracker_nw_history', JSON.stringify(nwHistory));
-    localStorage.setItem('tracker_nw_months', JSON.stringify(nwMonths));
-    localStorage.setItem('tracker_today_logs', JSON.stringify(todaysLogs));
-  } catch(e) { console.warn('LocalStorage save failed', e); }
-}
-function loadState(key, fallback) {
-  try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
-  catch(e) { return fallback; }
+  if(res.error){ errEl.textContent=res.error.message; errEl.classList.add('show'); return; }
+  if(authMode==='register' && !res.data.session){
+    errEl.style.background='var(--green-l)'; errEl.style.color='var(--green-d)';
+    errEl.textContent='Check your email to confirm your account, then sign in.';
+    errEl.classList.add('show'); return;
+  }
+  currentUser = res.data.user;
+  showApp();
 }
 
-// ── FITNESS ──────────────────────────────────────────────────────────────────
-var fitnessData     = loadState('tracker_fitness',      {run:14,gym:10,swim:6,cycle:5,ocr:3});
-var fitnessLastMonth= loadState('tracker_fitness_last', {run:12,gym:8,swim:7,cycle:6,ocr:2});
-var customActivities= loadState('tracker_custom_acts',  []);
-var selectedActivity=null, selectedGymType=null;
-var todaysLogs      = loadState('tracker_today_logs',   []);
-
-function getActKeys(){return['run','gym','swim','cycle','ocr',...customActivities.map(c=>c.id)];}
-function getActLabel(k){
-  if(k==='run')return'Run';if(k==='gym')return'Gym';
-  if(k==='swim')return'Swim';if(k==='cycle')return'Cycle';if(k==='ocr')return'OCR';
-  var c=customActivities.find(x=>x.id===k);return c?c.name:k;
+async function signOut(){
+  await sb.auth.signOut();
+  currentUser = null;
+  document.getElementById('main-app').classList.remove('visible');
+  document.getElementById('auth-wrap').style.display='flex';
+  showToast('Signed out');
 }
 
-var fitnessBarChart=new Chart(document.getElementById('fitnessBarChart'),{
-  type:'bar',
-  data:{labels:['Run','Gym','Swim','Cycle','OCR'],datasets:[
-    {label:'This month',data:[14,10,6,5,3],backgroundColor:'#378ADD',borderRadius:4,barPercentage:0.7},
-    {label:'Last month',data:[12,8,7,6,2],backgroundColor:'#B5D4F4',borderRadius:4,barPercentage:0.7}
-  ]},
-  options:baseBarOpts
+function showApp(){
+  document.getElementById('auth-wrap').style.display='none';
+  document.getElementById('main-app').classList.add('visible');
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  // Set default dates
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('sleep-date').value = today;
+  document.getElementById('content-date').value = today;
+  // Init calendar
+  const now = new Date();
+  calYear = now.getFullYear(); calMonth = now.getMonth();
+  // Load stored sleep goal
+  sleepGoal = parseFloat(localStorage.getItem('sleepGoal_'+currentUser.id)||'8');
+  document.getElementById('sleep-goal-inp').value = sleepGoal;
+  // Load all data
+  loadAllData();
+}
+
+// Check existing session on load
+window.addEventListener('load', async ()=>{
+  const {data:{session}} = await sb.auth.getSession();
+  if(session){ currentUser = session.user; showApp(); }
 });
-var fitnessPieChart=new Chart(document.getElementById('fitnessPieChart'),{
-  type:'pie',
-  data:{labels:['Run','Gym','Swim','Cycle','OCR'],datasets:[{data:[14,10,6,5,3],backgroundColor:PIE_COLORS.slice(0,5),borderWidth:0}]},
-  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{boxRadius:3}}}
-});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// DATA LOADING
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function loadAllData(){
+  showToast('Loading data...');
+  await Promise.all([loadFitness(), loadSleep(), loadContent(), loadAccounts(), loadNWHistory(), loadCustomActs()]);
+  showToast('Ready!');
+}
+
+async function loadFitness(){
+  const {data} = await sb.from('fitness_logs').select('*').eq('user_id',currentUser.id).order('date',{ascending:false});
+  allFitnessLogs = data || [];
+  refreshFitnessCounts();
+  refreshFitnessCharts();
+  renderCalendar();
+  if(selectedAct) renderRecentLogs(selectedAct);
+}
+
+async function loadSleep(){
+  const {data} = await sb.from('sleep_logs').select('*').eq('user_id',currentUser.id).order('date',{ascending:false});
+  allSleepLogs = data || [];
+  renderSleepChart();
+  renderSleepList();
+}
+
+async function loadContent(){
+  const {data} = await sb.from('content_logs').select('*').eq('user_id',currentUser.id).order('date',{ascending:false});
+  allContentLogs = data || [];
+  renderContentChart();
+  renderContentList();
+}
+
+async function loadAccounts(){
+  const {data} = await sb.from('accounts').select('*').eq('user_id',currentUser.id).order('created_at');
+  accounts = data || [];
+  renderAccounts();
+}
+
+async function loadNWHistory(){
+  const {data} = await sb.from('networth_history').select('*').eq('user_id',currentUser.id).order('snapshot_date');
+  nwHistory = data || [];
+  renderNWChart();
+}
+
+async function loadCustomActs(){
+  const {data} = await sb.from('custom_activities').select('*').eq('user_id',currentUser.id).order('created_at');
+  customActivities = data || [];
+  renderCustomActBtns();
+  refreshFitnessCounts();
+  refreshFitnessCharts();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// FITNESS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const CORE_ACTS = [{id:'run',label:'Run',icon:'🏃'},{id:'gym',label:'Gym',icon:'🏋️'},{id:'swim',label:'Swim',icon:'🏊'},{id:'cycle',label:'Cycle',icon:'🚴'},{id:'ocr',label:'OCR',icon:'🧗'}];
+
+function getActLabel(id){ const ca=customActivities.find(c=>c.id===id); if(ca) return ca.name; const co=CORE_ACTS.find(c=>c.id===id); return co?co.label:id; }
+
+function refreshFitnessCounts(){
+  const now = new Date();
+  const ym = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const allIds = [...CORE_ACTS.map(a=>a.id), ...customActivities.map(c=>c.id)];
+  const counts = {};
+  allIds.forEach(id=>counts[id]=0);
+  allFitnessLogs.forEach(l=>{ if(l.date&&l.date.startsWith(ym)){ const k=l.activity.toLowerCase().replace(' ',''); if(counts.hasOwnProperty(k)) counts[k]++; }});
+  allIds.forEach(id=>{ const el=document.getElementById('cnt-'+id); if(el) el.textContent=counts[id]+' this month'; });
+}
 
 function refreshFitnessCharts(){
-  var keys=getActKeys(),labels=keys.map(getActLabel);
-  var td=keys.map(k=>fitnessData[k]||0),ld=keys.map(k=>fitnessLastMonth[k]||0);
-  fitnessBarChart.data.labels=labels;fitnessBarChart.data.datasets[0].data=td;fitnessBarChart.data.datasets[1].data=ld;fitnessBarChart.update();
-  fitnessPieChart.data.labels=labels;fitnessPieChart.data.datasets[0].data=td;fitnessPieChart.data.datasets[0].backgroundColor=PIE_COLORS.slice(0,keys.length);fitnessPieChart.update();
-  var legend=document.getElementById('pie-legend'),total=td.reduce((a,b)=>a+b,0)||1;
-  legend.innerHTML=keys.map((k,i)=>`<span class="leg-item"><span class="leg-dot" style="background:${PIE_COLORS[i]}"></span>${getActLabel(k)} ${Math.round(td[i]/total*100)}%</span>`).join('');
+  const now = new Date();
+  const thisYM = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const lastD  = new Date(now.getFullYear(), now.getMonth()-1, 1);
+  const lastYM = lastD.getFullYear()+'-'+String(lastD.getMonth()+1).padStart(2,'0');
+  const allIds = [...CORE_ACTS.map(a=>a.id), ...customActivities.map(c=>c.id)];
+  const labels = allIds.map(getActLabel);
+  const thisCounts = allIds.map(id=>allFitnessLogs.filter(l=>l.date&&l.date.startsWith(thisYM)&&l.activity.toLowerCase().replace(' ','')==id).length);
+  const lastCounts = allIds.map(id=>allFitnessLogs.filter(l=>l.date&&l.date.startsWith(lastYM)&&l.activity.toLowerCase().replace(' ','')==id).length);
+  fitnessBarChart.data.labels=labels; fitnessBarChart.data.datasets[0].data=thisCounts; fitnessBarChart.data.datasets[1].data=lastCounts; fitnessBarChart.update();
+  fitnessPieChart.data.labels=labels; fitnessPieChart.data.datasets[0].data=thisCounts; fitnessPieChart.data.datasets[0].backgroundColor=PIE_COLORS.slice(0,allIds.length); fitnessPieChart.update();
+  const total=thisCounts.reduce((a,b)=>a+b,0)||1;
+  document.getElementById('pie-legend').innerHTML=allIds.map((id,i)=>`<span style="display:flex;align-items:center;gap:4px"><span class="leg-dot" style="background:${PIE_COLORS[i]}"></span>${getActLabel(id)} ${Math.round(thisCounts[i]/total*100)}%</span>`).join('');
 }
-refreshFitnessCharts();
 
-// Re-render saved custom activity buttons on load
-customActivities.forEach(function(c){
-  var container=document.getElementById('custom-activities');
-  var btn=document.createElement('button');
-  btn.className='act-btn';btn.id='abt-'+c.id;btn.style.marginTop='8px';btn.style.width='100%';
-  btn.innerHTML='<span class="act-icon" style="font-size:20px">&#11088;</span><span>'+c.name+'</span><span class="act-count" id="cnt-'+c.id+'">'+(fitnessData[c.id]||0)+' this month</span>';
-  btn.onclick=function(){selectActivity(c.id,btn)};
-  container.appendChild(btn);
-});
-
-function selectActivity(act,btn){
-  document.querySelectorAll('.act-btn').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected');selectedActivity=act;showActivityForm(act);
+function selectAct(id, btn){
+  document.querySelectorAll('.act-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  selectedAct = id;
+  showActForm(id);
+  renderRecentLogs(id);
 }
-function showActivityForm(act){
-  var panel=document.getElementById('activity-form'),title=document.getElementById('form-title'),fields=document.getElementById('form-fields');
-  panel.style.display='block';
+
+function showActForm(act){
+  document.getElementById('act-form-panel').style.display='block';
+  const today = new Date().toISOString().split('T')[0];
+  let html = `<div class="inp-group" style="margin-bottom:8px"><label>Date</label><input type="date" id="f-date" value="${today}"></div>`;
   if(act==='run'||act==='swim'||act==='cycle'){
-    title.textContent='Log '+getActLabel(act).toLowerCase();
-    fields.innerHTML='<div class="inp-grid"><div class="inp-group"><label>Distance (km)</label><input type="number" id="f-distance" placeholder="e.g. 5.2" step="0.1" min="0"></div><div class="inp-group"><label>Pace (min/km)</label><input type="text" id="f-pace" placeholder="e.g. 5:30"></div><div class="inp-group"><label>Time (min)</label><input type="number" id="f-time" placeholder="e.g. 35" min="0"></div><div class="inp-group"><label>Avg heart rate</label><input type="number" id="f-hr" placeholder="e.g. 155" min="0"></div></div>';
+    document.getElementById('act-form-title').textContent='Log '+getActLabel(act).toLowerCase();
+    html+=`<div class="inp-grid"><div class="inp-group"><label>Distance (km)</label><input type="number" id="f-dist" placeholder="e.g. 5.2" step="0.1" min="0"></div><div class="inp-group"><label>Pace (min/km)</label><input type="text" id="f-pace" placeholder="e.g. 5:30"></div><div class="inp-group"><label>Duration (min)</label><input type="number" id="f-time" placeholder="e.g. 35" min="0"></div><div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 155" min="0"></div></div>`;
   } else if(act==='gym'){
-    title.textContent='Log gym session';
-    fields.innerHTML='<div class="inp-group" style="margin-bottom:8px"><label>Workout type</label><div class="gym-types"><button class="gym-type-btn" onclick="toggleGymType(this,\'back\')">Back day</button><button class="gym-type-btn" onclick="toggleGymType(this,\'legs\')">Leg day</button><button class="gym-type-btn" onclick="toggleGymType(this,\'core\')">Core</button><button class="gym-type-btn" onclick="toggleGymType(this,\'cardio\')">Cardio</button><button class="gym-type-btn" onclick="toggleGymType(this,\'fullbody\')">Full body</button></div></div><div class="inp-grid"><div class="inp-group"><label>Time (min) — optional</label><input type="number" id="f-time" placeholder="e.g. 60" min="0"></div><div class="inp-group"><label>Heart rate — optional</label><input type="number" id="f-hr" placeholder="e.g. 140" min="0"></div></div>';
+    document.getElementById('act-form-title').textContent='Log gym session';
+    html+=`<div class="inp-group" style="margin-bottom:8px"><label>Workout type</label><div class="gym-pills"><button class="pill" onclick="selGym(this,'back')">Back day</button><button class="pill" onclick="selGym(this,'legs')">Leg day</button><button class="pill" onclick="selGym(this,'core')">Core</button><button class="pill" onclick="selGym(this,'cardio')">Cardio</button><button class="pill" onclick="selGym(this,'fullbody')">Full body</button></div></div><div class="inp-grid"><div class="inp-group"><label>Duration (min)</label><input type="number" id="f-time" placeholder="e.g. 60" min="0"></div><div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 140" min="0"></div></div>`;
   } else if(act==='ocr'){
-    title.textContent='Log obstacle course';
-    fields.innerHTML='<div class="inp-grid"><div class="inp-group"><label>Time (min)</label><input type="number" id="f-time" placeholder="e.g. 90" min="0"></div><div class="inp-group"><label>Avg heart rate</label><input type="number" id="f-hr" placeholder="e.g. 168" min="0"></div><div class="inp-group"><label>Distance (km)</label><input type="number" id="f-distance" placeholder="e.g. 12" step="0.1" min="0"></div><div class="inp-group"><label>No. of obstacles</label><input type="number" id="f-obstacles" placeholder="e.g. 25" min="0"></div></div><div class="inp-group" style="margin-top:8px"><label>Notes</label><textarea id="f-notes" placeholder="e.g. Failed monkey bars twice, nailed the rope climb..."></textarea></div>';
+    document.getElementById('act-form-title').textContent='Log obstacle course';
+    html+=`<div class="inp-grid"><div class="inp-group"><label>Duration (min)</label><input type="number" id="f-time" placeholder="e.g. 90" min="0"></div><div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 168" min="0"></div><div class="inp-group"><label>Distance (km)</label><input type="number" id="f-dist" placeholder="e.g. 12" step="0.1" min="0"></div><div class="inp-group"><label>No. of obstacles</label><input type="number" id="f-obs" placeholder="e.g. 25" min="0"></div></div><div class="inp-group" style="margin-top:8px"><label>Notes</label><textarea id="f-notes" placeholder="e.g. Nailed rope climb..."></textarea></div>`;
   } else {
-    var cAct=customActivities.find(c=>c.id===act);
-    title.textContent='Log '+(cAct?cAct.name.toLowerCase():'activity');
-    fields.innerHTML='<div class="inp-grid"><div class="inp-group"><label>Time (min)</label><input type="number" id="f-time" placeholder="e.g. 45" min="0"></div><div class="inp-group"><label>Avg heart rate</label><input type="number" id="f-hr" placeholder="e.g. 145" min="0"></div><div class="inp-group"><label>Distance (km) — optional</label><input type="number" id="f-distance" placeholder="—" step="0.1" min="0"></div></div><div class="inp-group" style="margin-top:8px"><label>Notes — optional</label><textarea id="f-notes" placeholder="Any notes..."></textarea></div>';
+    document.getElementById('act-form-title').textContent='Log '+getActLabel(act).toLowerCase();
+    html+=`<div class="inp-grid"><div class="inp-group"><label>Duration (min)</label><input type="number" id="f-time" placeholder="e.g. 45" min="0"></div><div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 145" min="0"></div><div class="inp-group"><label>Distance (km)</label><input type="number" id="f-dist" step="0.1" min="0"></div></div><div class="inp-group" style="margin-top:8px"><label>Notes</label><textarea id="f-notes" placeholder="Any notes..."></textarea></div>`;
   }
-  renderTodaysLogs();
-}
-function toggleGymType(btn,type){document.querySelectorAll('.gym-type-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');selectedGymType=type;}
-function saveActivityLog(){
-  if(!selectedActivity)return showToast('Select an activity first');
-  var entry={act:selectedActivity,label:getActLabel(selectedActivity)};
-  var dist=document.getElementById('f-distance'),pace=document.getElementById('f-pace'),time=document.getElementById('f-time'),hr=document.getElementById('f-hr'),obs=document.getElementById('f-obstacles'),notes=document.getElementById('f-notes');
-  if(selectedActivity==='gym'){if(!selectedGymType)return showToast('Pick a workout type');entry.detail={back:'Back day',legs:'Leg day',core:'Core',cardio:'Cardio',fullbody:'Full body'}[selectedGymType];if(time&&time.value)entry.time=time.value+'min';if(hr&&hr.value)entry.hr=hr.value+'bpm';}
-  else{if(dist&&dist.value)entry.distance=dist.value+'km';if(pace&&pace.value)entry.pace=pace.value+'/km';if(time&&time.value)entry.time=time.value+'min';if(hr&&hr.value)entry.hr=hr.value+'bpm';if(obs&&obs.value)entry.obstacles=obs.value+' obstacles';if(notes&&notes.value)entry.notes=notes.value;}
-  todaysLogs.push(entry);
-  fitnessData[selectedActivity]=(fitnessData[selectedActivity]||0)+1;
-  var countEl=document.getElementById('cnt-'+selectedActivity);if(countEl)countEl.textContent=fitnessData[selectedActivity]+' this month';
-  refreshFitnessCharts();renderTodaysLogs();saveState();showToast(entry.label+' logged!');
-  document.querySelectorAll('#form-fields input,#form-fields textarea').forEach(i=>i.value='');
-  document.querySelectorAll('.gym-type-btn').forEach(b=>b.classList.remove('active'));selectedGymType=null;
-}
-function renderTodaysLogs(){
-  var container=document.getElementById('todays-logs');if(!container)return;
-  var rel=todaysLogs.filter(l=>l.act===selectedActivity);if(!rel.length){container.innerHTML='';return;}
-  container.innerHTML='<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px">Logged today:</div>'+rel.map(l=>{var p=[];if(l.detail)p.push(l.detail);if(l.distance)p.push(l.distance);if(l.pace)p.push('@ '+l.pace);if(l.time)p.push(l.time);if(l.hr)p.push('HR '+l.hr);if(l.obstacles)p.push(l.obstacles);return'<div class="logged-item"><strong>'+l.label+'</strong>'+(p.length?' — '+p.join(' · '):'')+(l.notes?'<br><span style="font-style:italic">'+l.notes+'</span>':'')+'</div>';}).join('');
-}
-function openCustomForm(){document.getElementById('custom-act-form').classList.add('open');document.getElementById('add-custom-btn').style.display='none';}
-function closeCustomForm(){document.getElementById('custom-act-form').classList.remove('open');document.getElementById('add-custom-btn').style.display='';document.getElementById('custom-act-name').value='';}
-function addCustomActivity(){
-  var name=document.getElementById('custom-act-name').value.trim();if(!name)return showToast('Enter activity name');
-  var id='custom_'+Date.now();customActivities.push({id,name});fitnessData[id]=0;fitnessLastMonth[id]=0;
-  var container=document.getElementById('custom-activities'),btn=document.createElement('button');
-  btn.className='act-btn';btn.id='abt-'+id;btn.style.marginTop='8px';btn.style.width='100%';
-  btn.innerHTML='<span class="act-icon" style="font-size:20px">&#11088;</span><span>'+name+'</span><span class="act-count" id="cnt-'+id+'">0 this month</span>';
-  btn.onclick=function(){selectActivity(id,btn)};container.appendChild(btn);
-  refreshFitnessCharts();saveState();closeCustomForm();showToast(name+' added!');
+  document.getElementById('act-form-fields').innerHTML = html;
 }
 
-// ── SLEEP ────────────────────────────────────────────────────────────────────
-var sleepData=loadState('tracker_sleep',[6.5,7.0,8.0,7.5,6.0,7.0,8.0]);
-var sleepDays=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-var sleepChart=new Chart(document.getElementById('sleepBarChart'),{
-  type:'bar',
-  data:{labels:sleepDays,datasets:[{data:sleepData,backgroundColor:sleepData.map(h=>h>=7?'#1D9E75':'#EF9F27'),borderRadius:4,barPercentage:0.7}]},
-  options:{...baseBarOpts,scales:{...baseBarOpts.scales,y:{...baseBarOpts.scales.y,min:0,max:10,ticks:{color:textMuted,stepSize:2,callback:v=>v+'h'}}}}
-});
-function updateSleepStats(){
-  var avg=sleepData.reduce((a,b)=>a+b,0)/sleepData.length,last=sleepData[sleepData.length-1];
-  document.getElementById('avg-sleep').textContent=avg.toFixed(1)+'h';
-  document.getElementById('last-sleep').textContent=last.toFixed(1)+'h';
-  document.getElementById('sleep-quality').textContent=last>=7?'On target':'Below goal';
-}
-updateSleepStats();
-function logSleep(){
-  var st=document.getElementById('sleep-time').value,wt=document.getElementById('wake-time').value;
-  if(!st||!wt)return showToast('Enter both times');
-  var[sh,sm]=st.split(':').map(Number),[wh,wm]=wt.split(':').map(Number);
-  var diff=(wh*60+wm)>(sh*60+sm)?((wh*60+wm)-(sh*60+sm))/60:(1440-(sh*60+sm)+(wh*60+wm))/60;
-  diff=Math.round(diff*10)/10;
-  sleepData.shift();sleepData.push(diff);
-  sleepChart.data.datasets[0].data=sleepData;sleepChart.data.datasets[0].backgroundColor=sleepData.map(h=>h>=7?'#1D9E75':'#EF9F27');
-  sleepChart.update();updateSleepStats();saveState();showToast('Sleep logged: '+diff+'h');
-}
+function selGym(btn,type){ document.querySelectorAll('.gym-pills .pill').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); selectedGymType=type; }
 
-// ── CONTENT ──────────────────────────────────────────────────────────────────
-var contentTT=loadState('tracker_content_tt',[8,10,7,9]);
-var contentYT=loadState('tracker_content_yt',[1,2,3,2]);
-var contentChart=new Chart(document.getElementById('contentBarChart'),{
-  type:'bar',
-  data:{labels:['W1','W2','W3','W4'],datasets:[
-    {label:'TikTok',data:contentTT,backgroundColor:'#D4537E',borderRadius:4,barPercentage:0.6},
-    {label:'YouTube',data:contentYT,backgroundColor:'#378ADD',borderRadius:4,barPercentage:0.6}
-  ]},
-  options:{...baseBarOpts,scales:{...baseBarOpts.scales,y:{...baseBarOpts.scales.y,ticks:{color:textMuted,stepSize:2}}}}
-});
-function updateContentMetrics(){document.getElementById('tt-total').textContent=contentTT.reduce((a,b)=>a+b,0);document.getElementById('yt-total').textContent=contentYT.reduce((a,b)=>a+b,0);}
-updateContentMetrics();
-function logContent(){
-  var tt=parseInt(document.getElementById('tiktok-inp').value)||0,yt=parseInt(document.getElementById('youtube-inp').value)||0;
-  contentTT[3]+=tt;contentYT[3]+=yt;
-  contentChart.data.datasets[0].data=contentTT;contentChart.data.datasets[1].data=contentYT;contentChart.update();
-  updateContentMetrics();saveState();
-  document.getElementById('tiktok-inp').value=0;document.getElementById('youtube-inp').value=0;showToast('Posts logged!');
+async function saveActivityLog(){
+  if(!selectedAct) return showToast('Select an activity first');
+  const dateEl=document.getElementById('f-date');
+  if(!dateEl||!dateEl.value) return showToast('Select a date');
+  const row = {
+    user_id: currentUser.id,
+    date: dateEl.value,
+    activity: getActLabel(selectedAct),
+    distance: document.getElementById('f-dist')?.value ? parseFloat(document.getElementById('f-dist').value) : null,
+    pace: document.getElementById('f-pace')?.value || null,
+    duration: document.getElementById('f-time')?.value ? parseInt(document.getElementById('f-time').value) : null,
+    heart_rate: document.getElementById('f-hr')?.value ? parseInt(document.getElementById('f-hr').value) : null,
+    gym_type: selectedAct==='gym' ? (selectedGymType ? {back:'Back day',legs:'Leg day',core:'Core',cardio:'Cardio',fullbody:'Full body'}[selectedGymType] : null) : null,
+    obstacles: document.getElementById('f-obs')?.value ? parseInt(document.getElementById('f-obs').value) : null,
+    notes: document.getElementById('f-notes')?.value || null
+  };
+  if(selectedAct==='gym'&&!row.gym_type) return showToast('Pick a workout type');
+  const {error} = await sb.from('fitness_logs').insert(row);
+  if(error) return showToast('Error: '+error.message);
+  document.querySelectorAll('#act-form-fields input,#act-form-fields textarea').forEach(i=>i.value='');
+  document.querySelectorAll('.gym-pills .pill').forEach(b=>b.classList.remove('active'));
+  selectedGymType=null;
+  showToast(getActLabel(selectedAct)+' logged!');
+  await loadFitness();
 }
 
-// ── FINANCE ──────────────────────────────────────────────────────────────────
-var accounts=loadState('tracker_accounts',[
-  {id:'a1',name:'Chase Checking',balance:12400,type:'asset'},
-  {id:'a2',name:'Marcus Savings',balance:45000,type:'asset'},
-  {id:'a3',name:'Fidelity Investments',balance:38000,type:'asset'},
-  {id:'a4',name:'Coinbase Crypto',balance:7200,type:'asset'},
-  {id:'a5',name:'Primary Home',balance:210000,type:'asset'},
-  {id:'a6',name:'Chase Sapphire (CC)',balance:3200,type:'liability'},
-  {id:'a7',name:'Student Loan',balance:18000,type:'liability'}
-]);
-var nwHistory=loadState('tracker_nw_history',[210000,225000,241000,255000,268000,279300]);
-var nwMonths=loadState('tracker_nw_months',['Oct','Nov','Dec','Jan','Feb','Mar']);
-var editingId=null;
+function renderRecentLogs(actId){
+  const card = document.getElementById('recent-logs-card');
+  const list  = document.getElementById('recent-logs-list');
+  const title = document.getElementById('recent-logs-title');
+  const actLabel = getActLabel(actId);
+  const logs = allFitnessLogs.filter(l=>l.activity.toLowerCase().replace(' ','')==actId).slice(0,10);
+  card.style.display='block';
+  title.textContent='Recent: '+actLabel;
+  if(!logs.length){ list.innerHTML='<div class="empty-state">No '+actLabel+' logs yet</div>'; return; }
+  list.innerHTML = logs.map(l=>{
+    let meta=[];
+    if(l.distance) meta.push(l.distance+'km');
+    if(l.pace) meta.push(l.pace+'/km');
+    if(l.duration) meta.push(l.duration+'min');
+    if(l.heart_rate) meta.push('HR '+l.heart_rate);
+    if(l.gym_type) meta.push(l.gym_type);
+    if(l.obstacles) meta.push(l.obstacles+' obstacles');
+    return `<div class="log-item">
+      <div class="log-item-main">
+        <div class="log-item-date">${fmtDate(l.date)}</div>
+        <div class="log-item-detail">${actLabel}${meta.length?' — '+meta.join(' · '):''}</div>
+        ${l.notes?`<div class="log-item-meta" style="font-style:italic">${l.notes}</div>`:''}
+      </div>
+      <div class="log-item-actions">
+        <button class="icon-btn" onclick="editFitnessLog('${l.id}')">✏</button>
+        <button class="icon-btn danger-btn" onclick="deleteFitnessLog('${l.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
 
-var nwChart=new Chart(document.getElementById('nwBarChart'),{
-  type:'bar',
-  data:{labels:nwMonths,datasets:[{data:nwHistory,backgroundColor:'#378ADD',borderRadius:4,barPercentage:0.7}]},
-  options:{...baseBarOpts,scales:{...baseBarOpts.scales,y:{...baseBarOpts.scales.y,ticks:{color:textMuted,callback:v=>'₱'+Math.round(v/1000)+'K'}}}}
-});
-var assetPieChart=new Chart(document.getElementById('assetPieChart'),{
-  type:'pie',
-  data:{labels:[],datasets:[{data:[],backgroundColor:[],borderWidth:0}]},
-  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{boxRadius:3}}}
-});
+async function deleteFitnessLog(id){
+  if(!confirm('Delete this entry?')) return;
+  await sb.from('fitness_logs').delete().eq('id',id);
+  showToast('Deleted'); await loadFitness();
+}
 
-function calcAndRender(){
-  var assets=accounts.filter(a=>a.type==='asset'),liabs=accounts.filter(a=>a.type==='liability');
-  var ta=assets.reduce((s,a)=>s+a.balance,0),tl=liabs.reduce((s,a)=>s+a.balance,0),nw=ta-tl;
-  var prev=nwHistory[nwHistory.length-1],change=nw-prev;
-  document.getElementById('nw-value').textContent='₱'+(nw/1000).toFixed(1)+'K';
-  document.getElementById('asset-total').textContent='₱'+(ta/1000).toFixed(1)+'K';
-  document.getElementById('liab-total').textContent='Liabilities: ₱'+(tl/1000).toFixed(1)+'K';
-  document.getElementById('nw-change').textContent=(change>=0?'+₱':'-₱')+Math.abs((change/1000)).toFixed(1)+'K vs last entry';
+function editFitnessLog(id){
+  const l = allFitnessLogs.find(x=>x.id===id);
+  if(!l) return;
+  document.getElementById('edit-modal-title').textContent='Edit fitness log';
+  document.getElementById('edit-modal-body').innerHTML=`
+    <div class="inp-group"><label>Date</label><input type="date" id="em-date" value="${l.date}"></div>
+    <div class="inp-grid" style="margin-top:8px">
+      <div class="inp-group"><label>Distance (km)</label><input type="number" id="em-dist" value="${l.distance||''}" step="0.1" min="0"></div>
+      <div class="inp-group"><label>Pace</label><input type="text" id="em-pace" value="${l.pace||''}"></div>
+      <div class="inp-group"><label>Duration (min)</label><input type="number" id="em-time" value="${l.duration||''}" min="0"></div>
+      <div class="inp-group"><label>Heart rate</label><input type="number" id="em-hr" value="${l.heart_rate||''}" min="0"></div>
+    </div>
+    ${l.gym_type?`<div class="inp-group" style="margin-top:8px"><label>Workout type</label><input type="text" id="em-gymtype" value="${l.gym_type}"></div>`:''}
+    ${l.obstacles!==null?`<div class="inp-group" style="margin-top:8px"><label>Obstacles</label><input type="number" id="em-obs" value="${l.obstacles||''}"></div>`:''}
+    <div class="inp-group" style="margin-top:8px"><label>Notes</label><textarea id="em-notes">${l.notes||''}</textarea></div>`;
+  editModalSaveFn = async ()=>{
+    const upd = {
+      date: document.getElementById('em-date').value,
+      distance: document.getElementById('em-dist')?.value ? parseFloat(document.getElementById('em-dist').value) : null,
+      pace: document.getElementById('em-pace')?.value || null,
+      duration: document.getElementById('em-time')?.value ? parseInt(document.getElementById('em-time').value) : null,
+      heart_rate: document.getElementById('em-hr')?.value ? parseInt(document.getElementById('em-hr').value) : null,
+      gym_type: document.getElementById('em-gymtype')?.value || null,
+      obstacles: document.getElementById('em-obs')?.value ? parseInt(document.getElementById('em-obs').value) : null,
+      notes: document.getElementById('em-notes')?.value || null
+    };
+    await sb.from('fitness_logs').update(upd).eq('id',id);
+    closeEditModal(); showToast('Updated'); await loadFitness();
+  };
+  document.getElementById('edit-modal-save').onclick = editModalSaveFn;
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CALENDAR
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function calMove(dir){ calMonth+=dir; if(calMonth>11){calMonth=0;calYear++;} if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); }
+
+function renderCalendar(){
+  const label = new Date(calYear,calMonth,1).toLocaleString('en-US',{month:'long',year:'numeric'});
+  document.getElementById('cal-label').textContent = label;
+  const ym = calYear+'-'+String(calMonth+1).padStart(2,'0');
+  const logDays = new Set(allFitnessLogs.filter(l=>l.date&&l.date.startsWith(ym)).map(l=>parseInt(l.date.split('-')[2])));
+  const today = new Date(); const todayYM = today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0');
+  const isThisMonth = ym===todayYM;
+  const firstDay = new Date(calYear,calMonth,1).getDay();
+  const daysInMonth = new Date(calYear,calMonth+1,0).getDate();
+  const days = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  let html = days.map(d=>`<div class="cal-hdr">${d}</div>`).join('');
+  for(let i=0;i<firstDay;i++) html+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const isToday = isThisMonth && d===today.getDate();
+    const hasLog  = logDays.has(d);
+    html+=`<div class="cal-day ${hasLog?'has-log':''} ${isToday?'today':''}">${d}</div>`;
+  }
+  document.getElementById('cal-grid').innerHTML=html;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CUSTOM ACTIVITIES
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderCustomActBtns(){
+  const container = document.getElementById('custom-act-btns');
+  container.innerHTML='';
+  customActivities.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.className='act-btn'; btn.id='abt-'+c.id; btn.style='margin-top:8px;width:100%';
+    btn.innerHTML=`<span style="font-size:20px">⭐</span><span>${c.name}</span><span class="act-count" id="cnt-${c.id}">0 this month</span>`;
+    btn.onclick=()=>selectAct(c.id,btn);
+    container.appendChild(btn);
+  });
+}
+function openCustomActForm(){ document.getElementById('custom-act-form').style.display='flex'; document.getElementById('add-act-btn').style.display='none'; }
+function closeCustomActForm(){ document.getElementById('custom-act-form').style.display='none'; document.getElementById('add-act-btn').style.display=''; document.getElementById('custom-act-name').value=''; }
+async function saveCustomAct(){
+  const name=document.getElementById('custom-act-name').value.trim(); if(!name) return showToast('Enter a name');
+  const {error}=await sb.from('custom_activities').insert({user_id:currentUser.id,name});
+  if(error) return showToast('Error: '+error.message);
+  closeCustomActForm(); showToast(name+' added!'); await loadCustomActs();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SLEEP
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function saveSleepGoal(){
+  sleepGoal=parseFloat(document.getElementById('sleep-goal-inp').value)||8;
+  localStorage.setItem('sleepGoal_'+currentUser.id, sleepGoal);
+  showToast('Goal saved: '+sleepGoal+'h'); renderSleepChart();
+}
+
+async function logSleep(){
+  const date=document.getElementById('sleep-date').value;
+  const bed=document.getElementById('sleep-time').value;
+  const wake=document.getElementById('wake-time').value;
+  const notes=document.getElementById('sleep-notes').value;
+  if(!date||!bed||!wake) return showToast('Fill in date, bedtime, and wake time');
+  const [sh,sm]=bed.split(':').map(Number),[wh,wm]=wake.split(':').map(Number);
+  const diff=(wh*60+wm)>(sh*60+sm)?((wh*60+wm)-(sh*60+sm))/60:(1440-(sh*60+sm)+(wh*60+wm))/60;
+  const hrs=Math.round(diff*10)/10;
+  const {error}=await sb.from('sleep_logs').insert({user_id:currentUser.id,date,bedtime:bed,wake_time:wake,hours_slept:hrs,notes:notes||null});
+  if(error) return showToast('Error: '+error.message);
+  showToast('Sleep logged: '+hrs+'h'); await loadSleep();
+}
+
+function renderSleepChart(){
+  const filter=document.getElementById('sleep-filter').value;
+  const now=new Date();
+  let logs;
+  if(filter==='7'){
+    const cutoff=new Date(now); cutoff.setDate(cutoff.getDate()-6);
+    const cutoffStr=cutoff.toISOString().split('T')[0];
+    logs=allSleepLogs.filter(l=>l.date>=cutoffStr).slice(0,7);
+  } else if(filter==='week'){
+    const monday=new Date(now); monday.setDate(monday.getDate()-monday.getDay()+1);
+    const sunday=new Date(monday); sunday.setDate(sunday.getDate()+6);
+    const m=monday.toISOString().split('T')[0], s=sunday.toISOString().split('T')[0];
+    logs=allSleepLogs.filter(l=>l.date>=m&&l.date<=s);
+  } else {
+    const cutoff=new Date(now); cutoff.setDate(cutoff.getDate()-29);
+    const cutoffStr=cutoff.toISOString().split('T')[0];
+    logs=allSleepLogs.filter(l=>l.date>=cutoffStr).slice(0,30);
+  }
+  logs=[...logs].sort((a,b)=>a.date.localeCompare(b.date));
+  const labels=logs.map(l=>fmtDateShort(l.date));
+  const data=logs.map(l=>l.hours_slept);
+  sleepBarChart.data.labels=labels;
+  sleepBarChart.data.datasets[0].data=data;
+  sleepBarChart.data.datasets[0].backgroundColor=data.map(h=>h>=sleepGoal?'#1D9E75':'#EF9F27');
+  sleepBarChart.update();
+  const avg=data.length?Math.round(data.reduce((a,b)=>a+b,0)/data.length*10)/10:0;
+  document.getElementById('avg-sleep').textContent=avg?avg+'h':'—';
+  document.getElementById('sleep-vs-goal').textContent='Goal: '+sleepGoal+'h';
+}
+
+function renderSleepList(){
+  const el=document.getElementById('sleep-logs-list');
+  if(!allSleepLogs.length){el.innerHTML='<div class="empty-state">No sleep logs yet</div>';return;}
+  el.innerHTML=allSleepLogs.slice(0,15).map(l=>`<div class="log-item">
+    <div class="log-item-main">
+      <div class="log-item-date">${fmtDate(l.date)}</div>
+      <div class="log-item-detail">${l.hours_slept}h &nbsp;·&nbsp; ${l.bedtime} → ${l.wake_time}</div>
+      ${l.notes?`<div class="log-item-meta">${l.notes}</div>`:''}
+    </div>
+    <div class="log-item-actions">
+      <button class="icon-btn" onclick="editSleepLog('${l.id}')">✏</button>
+      <button class="icon-btn danger-btn" onclick="deleteSleepLog('${l.id}')">🗑</button>
+    </div>
+  </div>`).join('');
+}
+
+async function deleteSleepLog(id){
+  if(!confirm('Delete this entry?')) return;
+  await sb.from('sleep_logs').delete().eq('id',id);
+  showToast('Deleted'); await loadSleep();
+}
+
+function editSleepLog(id){
+  const l=allSleepLogs.find(x=>x.id===id); if(!l) return;
+  document.getElementById('edit-modal-title').textContent='Edit sleep log';
+  document.getElementById('edit-modal-body').innerHTML=`
+    <div class="inp-group"><label>Date</label><input type="date" id="em-date" value="${l.date}"></div>
+    <div class="inp-grid" style="margin-top:8px">
+      <div class="inp-group"><label>Bedtime</label><input type="time" id="em-bed" value="${l.bedtime}"></div>
+      <div class="inp-group"><label>Wake up</label><input type="time" id="em-wake" value="${l.wake_time}"></div>
+    </div>
+    <div class="inp-group" style="margin-top:8px"><label>Notes</label><input type="text" id="em-notes" value="${l.notes||''}"></div>`;
+  editModalSaveFn=async()=>{
+    const bed=document.getElementById('em-bed').value, wake=document.getElementById('em-wake').value;
+    const [sh,sm]=bed.split(':').map(Number),[wh,wm]=wake.split(':').map(Number);
+    const hrs=Math.round(((wh*60+wm)>(sh*60+sm)?((wh*60+wm)-(sh*60+sm)):(1440-(sh*60+sm)+(wh*60+wm)))/60*10)/10;
+    await sb.from('sleep_logs').update({date:document.getElementById('em-date').value,bedtime:bed,wake_time:wake,hours_slept:hrs,notes:document.getElementById('em-notes').value||null}).eq('id',id);
+    closeEditModal(); showToast('Updated'); await loadSleep();
+  };
+  document.getElementById('edit-modal-save').onclick=editModalSaveFn;
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CONTENT
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function logContent(){
+  const date=document.getElementById('content-date').value;
+  const platform=document.getElementById('content-platform').value;
+  const title=document.getElementById('content-title').value.trim();
+  const segment=document.getElementById('content-segment').value.trim();
+  if(!date||!platform) return showToast('Fill in date and platform');
+  const {error}=await sb.from('content_logs').insert({user_id:currentUser.id,date,platform,content_title:title||null,segment:segment||null});
+  if(error) return showToast('Error: '+error.message);
+  document.getElementById('content-title').value=''; document.getElementById('content-segment').value='';
+  showToast('Post logged!'); await loadContent();
+}
+
+function renderContentChart(){
+  const filter=document.getElementById('content-filter').value;
+  const now=new Date();
+  let logs, labels=[];
+  if(filter==='week'){
+    const mon=new Date(now); mon.setDate(mon.getDate()-mon.getDay()+1);
+    const days=Array.from({length:7},(_,i)=>{const d=new Date(mon);d.setDate(d.getDate()+i);return d.toISOString().split('T')[0];});
+    labels=days.map(d=>fmtDateShort(d));
+    const tt=days.map(d=>allContentLogs.filter(l=>l.date===d&&l.platform==='TikTok').length);
+    const yt=days.map(d=>allContentLogs.filter(l=>l.date===d&&l.platform==='YouTube').length);
+    contentBarChart.data.labels=labels; contentBarChart.data.datasets[0].data=tt; contentBarChart.data.datasets[1].data=yt; contentBarChart.update();
+    document.getElementById('tt-total').textContent=tt.reduce((a,b)=>a+b,0);
+    document.getElementById('yt-total').textContent=yt.reduce((a,b)=>a+b,0);
+    document.getElementById('tt-range-lbl').textContent='this week';
+    document.getElementById('yt-range-lbl').textContent='this week';
+  } else {
+    const weeks=[0,1,2,3].map(w=>{const d=new Date(now);d.setDate(d.getDate()-w*7);return d.toISOString().split('T')[0].slice(0,8);});
+    weeks.reverse();
+    labels=weeks.map((w,i)=>'W'+(i+1));
+    const tt=weeks.map(w=>allContentLogs.filter(l=>l.date&&l.date.startsWith(w)&&l.platform==='TikTok').length);
+    const yt=weeks.map(w=>allContentLogs.filter(l=>l.date&&l.date.startsWith(w)&&l.platform==='YouTube').length);
+    contentBarChart.data.labels=labels; contentBarChart.data.datasets[0].data=tt; contentBarChart.data.datasets[1].data=yt; contentBarChart.update();
+    document.getElementById('tt-total').textContent=tt.reduce((a,b)=>a+b,0);
+    document.getElementById('yt-total').textContent=yt.reduce((a,b)=>a+b,0);
+    document.getElementById('tt-range-lbl').textContent='last 4 weeks';
+    document.getElementById('yt-range-lbl').textContent='last 4 weeks';
+  }
+}
+
+function renderContentList(){
+  const el=document.getElementById('content-logs-list');
+  if(!allContentLogs.length){el.innerHTML='<div class="empty-state">No posts logged yet</div>';return;}
+  el.innerHTML=allContentLogs.slice(0,15).map(l=>`<div class="log-item">
+    <div class="log-item-main">
+      <div class="log-item-date">${fmtDate(l.date)} · ${l.platform}</div>
+      <div class="log-item-detail">${l.content_title||'(no title)'}</div>
+      ${l.segment?`<div class="log-item-meta">${l.segment}</div>`:''}
+    </div>
+    <div class="log-item-actions">
+      <button class="icon-btn" onclick="editContentLog('${l.id}')">✏</button>
+      <button class="icon-btn danger-btn" onclick="deleteContentLog('${l.id}')">🗑</button>
+    </div>
+  </div>`).join('');
+}
+
+async function deleteContentLog(id){
+  if(!confirm('Delete this post?')) return;
+  await sb.from('content_logs').delete().eq('id',id);
+  showToast('Deleted'); await loadContent();
+}
+
+function editContentLog(id){
+  const l=allContentLogs.find(x=>x.id===id); if(!l) return;
+  document.getElementById('edit-modal-title').textContent='Edit post log';
+  document.getElementById('edit-modal-body').innerHTML=`
+    <div class="inp-group"><label>Date</label><input type="date" id="em-date" value="${l.date}"></div>
+    <div class="inp-group" style="margin-top:8px"><label>Platform</label><select id="em-platform"><option ${l.platform==='TikTok'?'selected':''}>TikTok</option><option ${l.platform==='YouTube'?'selected':''}>YouTube</option></select></div>
+    <div class="inp-group" style="margin-top:8px"><label>Content title</label><input type="text" id="em-title" value="${l.content_title||''}"></div>
+    <div class="inp-group" style="margin-top:8px"><label>Segment</label><input type="text" id="em-seg" value="${l.segment||''}"></div>`;
+  editModalSaveFn=async()=>{
+    await sb.from('content_logs').update({date:document.getElementById('em-date').value,platform:document.getElementById('em-platform').value,content_title:document.getElementById('em-title').value||null,segment:document.getElementById('em-seg').value||null}).eq('id',id);
+    closeEditModal(); showToast('Updated'); await loadContent();
+  };
+  document.getElementById('edit-modal-save').onclick=editModalSaveFn;
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// FINANCE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function openAddAcct(){ document.getElementById('add-acct-wrap').style.display='block'; document.getElementById('add-acct-btn').style.display='none'; }
+function closeAddAcct(){ document.getElementById('add-acct-wrap').style.display='none'; document.getElementById('add-acct-btn').style.display=''; document.getElementById('new-acct-name').value=''; document.getElementById('new-acct-balance').value=''; }
+
+async function addAccount(){
+  const name=document.getElementById('new-acct-name').value.trim();
+  const bal=parseFloat(document.getElementById('new-acct-balance').value)||0;
+  const type=document.getElementById('new-acct-type').value;
+  if(!name) return showToast('Enter account name');
+  const {error}=await sb.from('accounts').insert({user_id:currentUser.id,name,balance:bal,type});
+  if(error) return showToast('Error: '+error.message);
+  closeAddAcct(); showToast('Account added!');
+  await loadAccounts(); await snapshotNW();
+}
+
+function renderAccounts(){
+  const gallery=document.getElementById('acct-gallery'); gallery.innerHTML='';
+  accounts.forEach(a=>{
+    const card=document.createElement('div'); card.className='acct-card';
+    if(editingAcctId===a.id){
+      card.classList.add('edit-card');
+      card.innerHTML=`<div style="font-size:12px;font-weight:500;color:var(--txt2);margin-bottom:6px">Editing</div>
+        <div class="inp-group" style="margin-bottom:6px"><label>Name</label><input type="text" id="ea-name" value="${a.name}"></div>
+        <div class="inp-grid" style="margin-bottom:6px">
+          <div class="inp-group"><label>Balance (₱)</label><input type="number" id="ea-bal" value="${a.balance}"></div>
+          <div class="inp-group"><label>Type</label><select id="ea-type"><option value="asset" ${a.type==='asset'?'selected':''}>Asset</option><option value="liability" ${a.type==='liability'?'selected':''}>Liability</option></select></div>
+        </div>
+        <div style="display:flex;gap:6px"><button class="btn sec sm" onclick="cancelEditAcct()">Cancel</button><button class="btn sm" onclick="saveEditAcct('${a.id}')">Save</button></div>`;
+    } else {
+      const assetIdx=accounts.filter(x=>x.type==='asset').indexOf(a);
+      card.innerHTML=`<span class="badge ${a.type==='asset'?'asset':'liab'}">${a.type==='asset'?'Asset':'Liability'}</span>
+        <div class="acct-name">${a.name}</div>
+        <div class="acct-bal ${a.type==='liability'?'liab-col':''}">₱${Number(a.balance).toLocaleString()}</div>
+        <div class="acct-actions"><button class="icon-btn" onclick="startEditAcct('${a.id}')">✏</button><button class="icon-btn danger-btn" onclick="deleteAcct('${a.id}')">🗑</button></div>`;
+    }
+    gallery.appendChild(card);
+  });
+  calcNWSummary();
+}
+
+function startEditAcct(id){ editingAcctId=id; renderAccounts(); }
+function cancelEditAcct(){ editingAcctId=null; renderAccounts(); }
+
+async function saveEditAcct(id){
+  const name=document.getElementById('ea-name').value.trim();
+  const bal=parseFloat(document.getElementById('ea-bal').value)||0;
+  const type=document.getElementById('ea-type').value;
+  if(!name) return showToast('Enter a name');
+  await sb.from('accounts').update({name,balance:bal,type}).eq('id',id);
+  editingAcctId=null; showToast('Account updated'); await loadAccounts(); await snapshotNW();
+}
+
+async function deleteAcct(id){
+  if(!confirm('Delete this account?')) return;
+  await sb.from('accounts').delete().eq('id',id);
+  showToast('Account removed'); await loadAccounts(); await snapshotNW();
+}
+
+function calcNWSummary(){
+  const assets=accounts.filter(a=>a.type==='asset');
+  const liabs=accounts.filter(a=>a.type==='liability');
+  const ta=assets.reduce((s,a)=>s+a.balance,0);
+  const tl=liabs.reduce((s,a)=>s+a.balance,0);
+  const nw=ta-tl;
+  const prev=nwHistory.length>1?nwHistory[nwHistory.length-2].net_worth:nw;
+  const change=nw-prev;
+  document.getElementById('nw-value').textContent='₱'+nw.toLocaleString();
+  document.getElementById('asset-total').textContent='₱'+ta.toLocaleString();
+  document.getElementById('liab-total').textContent='Liabilities: ₱'+tl.toLocaleString();
+  document.getElementById('nw-change').textContent=(change>=0?'+':'')+change.toLocaleString()+' vs last snapshot';
   assetPieChart.data.labels=assets.map(a=>a.name);
   assetPieChart.data.datasets[0].data=assets.map(a=>a.balance);
   assetPieChart.data.datasets[0].backgroundColor=PIE_COLORS.slice(0,assets.length);
   assetPieChart.update();
-  var legend=document.getElementById('asset-legend'),t=ta||1;
-  legend.innerHTML=assets.map((a,i)=>'<span class="leg-item"><span class="leg-dot" style="background:'+PIE_COLORS[i]+'"></span>'+(a.name.length>14?a.name.slice(0,14)+'…':a.name)+' '+Math.round(a.balance/t*100)+'%</span>').join('');
+  const t=ta||1;
+  document.getElementById('asset-legend').innerHTML=assets.map((a,i)=>`<span style="display:flex;align-items:center;gap:4px"><span class="leg-dot" style="background:${PIE_COLORS[i]}"></span>${a.name.length>14?a.name.slice(0,14)+'…':a.name} ${Math.round(a.balance/t*100)}%</span>`).join('');
 }
 
-function renderAccounts(){
-  var gallery=document.getElementById('acct-gallery');gallery.innerHTML='';
-  accounts.forEach(function(a){
-    var card=document.createElement('div');
-    card.className='acct-card'+(a.type==='liability'?' liability-card':'');
-    if(editingId===a.id){
-      card.classList.add('editing-card');card.style.gridColumn='1/-1';
-      card.innerHTML='<div style="font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:6px">Editing account</div><div style="display:flex;flex-direction:column;gap:6px"><input type="text" id="edit-name-'+a.id+'" value="'+a.name+'" style="border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);padding:7px 10px;font-size:13px;color:var(--color-text-primary);width:100%;font-family:-apple-system,sans-serif"><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><input type="number" id="edit-bal-'+a.id+'" value="'+a.balance+'" style="border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);padding:7px 10px;font-size:13px;color:var(--color-text-primary);font-family:-apple-system,sans-serif"><select id="edit-type-'+a.id+'" style="border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);padding:7px 10px;font-size:13px;color:var(--color-text-primary);font-family:-apple-system,sans-serif"><option value="asset"'+(a.type==='asset'?' selected':'')+'>Asset</option><option value="liability"'+(a.type==='liability'?' selected':'')+'>Liability</option></select></div><div style="display:flex;gap:6px"><button class="log-btn secondary" onclick="cancelEdit()" style="margin-top:0;font-size:13px;padding:8px">Cancel</button><button class="log-btn" onclick="saveEdit(\''+a.id+'\')" style="margin-top:0;font-size:13px;padding:8px">Save</button></div></div>';
-    } else {
-      var assetIdx=accounts.filter(x=>x.type==='asset').indexOf(a);
-      card.innerHTML='<span class="acct-card-type '+(a.type==='asset'?'type-asset':'type-liab')+'">'+(a.type==='asset'?'Asset':'Liability')+'</span><div class="acct-card-name">'+a.name+'</div><div class="acct-card-balance'+(a.type==='liability'?' liab-bal':'')+'">₱'+Number(a.balance).toLocaleString()+'</div><div class="acct-card-actions"><button class="icon-btn" onclick="startEdit(\''+a.id+'\')" title="Edit">&#9999;</button><button class="icon-btn danger" onclick="deleteAcct(\''+a.id+'\')" title="Delete">&#128465;</button></div>';
-    }
-    gallery.appendChild(card);
-  });
-  calcAndRender();
+async function snapshotNW(){
+  const ta=accounts.filter(a=>a.type==='asset').reduce((s,a)=>s+a.balance,0);
+  const tl=accounts.filter(a=>a.type==='liability').reduce((s,a)=>s+a.balance,0);
+  const nw=ta-tl;
+  const today=new Date().toISOString().split('T')[0];
+  const {data:existing}=await sb.from('networth_history').select('id').eq('user_id',currentUser.id).eq('snapshot_date',today);
+  if(existing&&existing.length>0){
+    await sb.from('networth_history').update({assets:ta,liabilities:tl,net_worth:nw}).eq('id',existing[0].id);
+  } else {
+    await sb.from('networth_history').insert({user_id:currentUser.id,snapshot_date:today,assets:ta,liabilities:tl,net_worth:nw});
+  }
+  await loadNWHistory();
 }
 
-function startEdit(id){editingId=id;renderAccounts();}
-function cancelEdit(){editingId=null;renderAccounts();}
-function saveEdit(id){
-  var a=accounts.find(x=>x.id===id);
-  a.name=document.getElementById('edit-name-'+id).value.trim()||a.name;
-  a.balance=parseFloat(document.getElementById('edit-bal-'+id).value)||0;
-  a.type=document.getElementById('edit-type-'+id).value;
-  editingId=null;renderAccounts();saveState();showToast('Account updated');
+function renderNWChart(){
+  const filter=document.getElementById('nw-filter').value;
+  let labels=[], data=[];
+  if(filter==='monthly'){
+    const sorted=[...nwHistory].sort((a,b)=>a.snapshot_date.localeCompare(b.snapshot_date));
+    const monthly={};
+    sorted.forEach(r=>{ const ym=r.snapshot_date.slice(0,7); monthly[ym]=r.net_worth; });
+    const entries=Object.entries(monthly).slice(-12);
+    labels=entries.map(([ym])=>{ const [y,m]=ym.split('-'); return new Date(y,m-1,1).toLocaleString('en-US',{month:'short',year:'2-digit'}); });
+    data=entries.map(([,v])=>v);
+  } else {
+    const yearly={};
+    nwHistory.forEach(r=>{ const y=r.snapshot_date.slice(0,4); if(!yearly[y]||r.snapshot_date>yearly[y].date) yearly[y]={val:r.net_worth,date:r.snapshot_date}; });
+    const entries=Object.entries(yearly).sort(([a],[b])=>a-b);
+    labels=entries.map(([y])=>y);
+    data=entries.map(([,v])=>v.val);
+  }
+  nwBarChart.data.labels=labels; nwBarChart.data.datasets[0].data=data; nwBarChart.update();
 }
-function deleteAcct(id){
-  if(!confirm('Delete this account?'))return;
-  accounts=accounts.filter(a=>a.id!==id);renderAccounts();saveState();showToast('Account removed');
-}
-function openAddAcct(){document.getElementById('add-acct-form-wrap').style.display='block';document.getElementById('add-acct-btn').style.display='none';}
-function closeAddAcct(){document.getElementById('add-acct-form-wrap').style.display='none';document.getElementById('add-acct-btn').style.display='';document.getElementById('new-acct-name').value='';document.getElementById('new-acct-balance').value='';}
-function addAccount(){
-  var name=document.getElementById('new-acct-name').value.trim(),bal=parseFloat(document.getElementById('new-acct-balance').value)||0,type=document.getElementById('new-acct-type').value;
-  if(!name)return showToast('Enter account name');
-  var newNW=accounts.filter(a=>a.type==='asset').reduce((s,a)=>s+a.balance,0)+(type==='asset'?bal:0)-accounts.filter(a=>a.type==='liability').reduce((s,a)=>s+a.balance,0)-(type==='liability'?bal:0);
-  nwHistory.push(Math.round(newNW));nwMonths.push(new Date().toLocaleString('en-US',{month:'short'}));
-  if(nwHistory.length>8){nwHistory.shift();nwMonths.shift();}
-  nwChart.data.labels=nwMonths;nwChart.data.datasets[0].data=nwHistory;nwChart.update();
-  accounts.push({id:'a'+Date.now(),name,balance:bal,type});
-  closeAddAcct();renderAccounts();saveState();showToast('Account added!');
-}
-renderAccounts();
 
-// ── NAV & TOAST ───────────────────────────────────────────────────────────────
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// MODAL / NAV / UTILS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function closeEditModal(){ document.getElementById('edit-modal').classList.remove('open'); }
+document.getElementById('edit-modal').addEventListener('click',e=>{ if(e.target===document.getElementById('edit-modal')) closeEditModal(); });
+
 function switchTab(name,btn){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('visible'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('visible');btn.classList.add('active');
-}
-var toastTimer;
-function showToast(msg){
-  var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
-  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
+  document.getElementById('tab-'+name).classList.add('visible'); btn.classList.add('active');
 }
 
-// ── SUPABASE CONFIG ───────────────────────────────────────────────────────────
-// STEP: Replace the two values below with YOUR Supabase credentials
-const SUPABASE_URL = 'YOUR_PROJECT_URL_HERE';
-const SUPABASE_KEY = 'YOUR_ANON_KEY_HERE';
+let toastTimer;
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2500); }
 
-const DB = {
-  async query(table, method='GET', body=null, filters='') {
-    const url = `${SUPABASE_URL}/rest/v1/${table}${filters}`;
-    const opts = {
-      method,
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': method==='POST' ? 'return=representation' : ''
-      }
-    };
-    if(body) opts.body = JSON.stringify(body);
-    const res = await fetch(url, opts);
-    if(!res.ok){ const e=await res.text(); console.error('DB error:',e); return null; }
-    try{ return await res.json(); } catch(e){ return null; }
-  },
-  get: (table, filters='') => DB.query(table,'GET',null,'?order=created_at.asc'+filters),
-  post: (table, body) => DB.query(table,'POST',body),
-  patch: (table, id, body) => DB.query(table,'PATCH',body,`?id=eq.${id}`),
-  delete: (table, id) => DB.query(table,'DELETE',null,`?id=eq.${id}`)
-};
-
-// ── CHECK IF SUPABASE IS CONFIGURED ──────────────────────────────────────────
-const SUPABASE_READY = SUPABASE_URL !== 'https://qzbrtjuesnuqtfjimaqi.supabase.co' && SUPABASE_KEY !== 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6YnJ0anVlc251cXRmamltYXFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0NjQwMjcsImV4cCI6MjA5MTA0MDAyN30.Kj5FYjE31_jJecL1INw6KqcdAMPKvzDjU_Pcs_Q0VsM';
-
-// ── SYNC: LOAD ALL DATA FROM SUPABASE ON APP START ───────────────────────────
-async function loadFromSupabase() {
-  if(!SUPABASE_READY) return;
-  showToast('Loading your data...');
-
-  // Load accounts
-  const accts = await DB.get('accounts');
-  if(accts && accts.length > 0) {
-    accounts = accts.map(a => ({id: String(a.id), name: a.name, balance: a.balance, type: a.type, _dbid: a.id}));
-    renderAccounts();
-  }
-
-  // Load networth history
-  const nwData = await DB.get('networth_history');
-  if(nwData && nwData.length > 0) {
-    nwHistory = nwData.map(r => r.net_worth);
-    nwMonths  = nwData.map(r => r.month);
-    nwChart.data.labels = nwMonths;
-    nwChart.data.datasets[0].data = nwHistory;
-    nwChart.update();
-  }
-
-  // Load fitness logs — rebuild counts per activity
-  const fitLogs = await DB.get('fitness_logs');
-  if(fitLogs && fitLogs.length > 0) {
-    // Reset counts for current month
-    const now = new Date();
-    const thisMonth = now.getFullYear()+'-'+(String(now.getMonth()+1).padStart(2,'0'));
-    const keys = ['run','gym','swim','cycle','ocr'];
-    keys.forEach(k => fitnessData[k] = 0);
-    fitLogs.forEach(log => {
-      if(log.date && log.date.startsWith(thisMonth)) {
-        const actKey = log.activity ? log.activity.toLowerCase() : '';
-        if(fitnessData.hasOwnProperty(actKey)) fitnessData[actKey]++;
-      }
-    });
-    keys.forEach(k => {
-      const el = document.getElementById('cnt-'+k);
-      if(el) el.textContent = fitnessData[k]+' this month';
-    });
-    refreshFitnessCharts();
-    // Store logs for today display
-    const today = new Date().toISOString().split('T')[0];
-    todaysLogs = fitLogs
-      .filter(l => l.date === today)
-      .map(l => ({act: l.activity.toLowerCase(), label: l.activity, detail: l.gym_type, distance: l.distance ? l.distance+'km' : '', pace: l.pace ? l.pace+'/km' : '', time: l.duration ? l.duration+'min' : '', hr: l.heart_rate ? l.heart_rate+'bpm' : '', obstacles: l.obstacles ? l.obstacles+' obstacles' : '', notes: l.notes}));
-  }
-
-  // Load sleep logs — last 7 entries
-  const sleepLogs = await DB.get('sleep_logs', '&limit=7');
-  if(sleepLogs && sleepLogs.length > 0) {
-    const recent = sleepLogs.slice(-7);
-    sleepData = recent.map(r => r.hours_slept);
-    while(sleepData.length < 7) sleepData.unshift(0);
-    sleepChart.data.datasets[0].data = sleepData;
-    sleepChart.data.datasets[0].backgroundColor = sleepData.map(h => h>=7 ? '#1D9E75' : '#EF9F27');
-    sleepChart.update();
-    updateSleepStats();
-  }
-
-  // Load content logs — last 4 weeks
-  const contentData = await DB.get('content_logs', '&limit=4');
-  if(contentData && contentData.length > 0) {
-    const recent = contentData.slice(-4);
-    contentTT = recent.map(r => r.tiktok_posts || 0);
-    contentYT = recent.map(r => r.youtube_posts || 0);
-    while(contentTT.length < 4){ contentTT.unshift(0); contentYT.unshift(0); }
-    contentChart.data.datasets[0].data = contentTT;
-    contentChart.data.datasets[1].data = contentYT;
-    contentChart.update();
-    updateContentMetrics();
-  }
-
-  showToast('Data loaded!');
-}
-
-// ── OVERRIDE saveState TO ALSO PUSH TO SUPABASE ──────────────────────────────
-// We wrap the original saveState so LocalStorage still works as backup
-const _origSaveState = saveState;
-
-async function saveActivityToSupabase(entry) {
-  if(!SUPABASE_READY) return;
-  const today = new Date().toISOString().split('T')[0];
-  await DB.post('fitness_logs', {
-    date: today,
-    activity: entry.label,
-    distance: entry.distance ? parseFloat(entry.distance) : null,
-    pace: entry.pace ? entry.pace.replace('/km','') : null,
-    duration: entry.time ? parseInt(entry.time) : null,
-    heart_rate: entry.hr ? parseInt(entry.hr) : null,
-    gym_type: entry.detail || null,
-    obstacles: entry.obstacles ? parseInt(entry.obstacles) : null,
-    notes: entry.notes || null
-  });
-}
-
-async function saveSleepToSupabase() {
-  if(!SUPABASE_READY) return;
-  const today = new Date().toISOString().split('T')[0];
-  const hrs = sleepData[sleepData.length-1];
-  const bed = document.getElementById('sleep-time').value;
-  const wake = document.getElementById('wake-time').value;
-  await DB.post('sleep_logs', {date: today, bedtime: bed, wake_time: wake, hours_slept: hrs});
-}
-
-async function saveContentToSupabase() {
-  if(!SUPABASE_READY) return;
-  const monday = new Date();
-  monday.setDate(monday.getDate() - monday.getDay() + 1);
-  const weekStart = monday.toISOString().split('T')[0];
-  // Check if this week already exists and update, otherwise insert
-  const existing = await DB.query('content_logs','GET',null,`?week_start=eq.${weekStart}`);
-  if(existing && existing.length > 0) {
-    await DB.patch('content_logs', existing[0].id, {tiktok_posts: contentTT[3], youtube_posts: contentYT[3]});
-  } else {
-    await DB.post('content_logs', {week_start: weekStart, tiktok_posts: contentTT[3], youtube_posts: contentYT[3]});
-  }
-}
-
-async function saveAccountsToSupabase() {
-  if(!SUPABASE_READY) return;
-  // Delete all and reinsert for simplicity
-  const existing = await DB.get('accounts');
-  if(existing) {
-    for(const a of existing) await DB.delete('accounts', a.id);
-  }
-  for(const a of accounts) {
-    await DB.post('accounts', {name: a.name, balance: a.balance, type: a.type});
-  }
-  // Save networth snapshot
-  const assets = accounts.filter(a=>a.type==='asset').reduce((s,a)=>s+a.balance,0);
-  const liabs  = accounts.filter(a=>a.type==='liability').reduce((s,a)=>s+a.balance,0);
-  const nw     = assets - liabs;
-  const month  = new Date().toLocaleString('en-US',{month:'short',year:'numeric'});
-  const existingNW = await DB.query('networth_history','GET',null,`?month=eq.${encodeURIComponent(month)}`);
-  if(existingNW && existingNW.length > 0) {
-    await DB.patch('networth_history', existingNW[0].id, {assets, liabilities: liabs, net_worth: nw});
-  } else {
-    await DB.post('networth_history', {month, assets, liabilities: liabs, net_worth: nw});
-  }
-}
-
-// ── PATCH EXISTING FUNCTIONS TO ALSO SAVE TO SUPABASE ────────────────────────
-const _origSaveActivityLog = saveActivityLog;
-saveActivityLog = async function() {
-  _origSaveActivityLog();
-  if(todaysLogs.length > 0) {
-    const last = todaysLogs[todaysLogs.length-1];
-    await saveActivityToSupabase(last);
-  }
-};
-
-const _origLogSleep = logSleep;
-logSleep = async function() {
-  _origLogSleep();
-  await saveSleepToSupabase();
-};
-
-const _origLogContent = logContent;
-logContent = async function() {
-  _origLogContent();
-  await saveContentToSupabase();
-};
-
-const _origAddAccount = addAccount;
-addAccount = async function() {
-  _origAddAccount();
-  await saveAccountsToSupabase();
-};
-
-const _origSaveEdit = saveEdit;
-saveEdit = async function(id) {
-  _origSaveEdit(id);
-  await saveAccountsToSupabase();
-};
-
-const _origDeleteAcct = deleteAcct;
-deleteAcct = async function(id) {
-  if(!confirm('Delete this account?')) return;
-  accounts = accounts.filter(a=>a.id!==id);
-  renderAccounts(); saveState(); showToast('Account removed');
-  await saveAccountsToSupabase();
-};
-
-// ── KICK OFF: LOAD DATA WHEN APP STARTS ──────────────────────────────────────
-window.addEventListener('load', () => {
-  if(SUPABASE_READY) {
-    loadFromSupabase();
-  } else {
-    showToast('Add your Supabase keys to enable cloud sync');
-  }
-});
-
+function fmtDate(d){ if(!d) return ''; const [y,m,day]=d.split('-'); return new Date(y,m-1,day).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+function fmtDateShort(d){ if(!d) return ''; const [y,m,day]=d.split('-'); return new Date(y,m-1,day).toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
 </script>
 </body>
 </html>
