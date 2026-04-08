@@ -92,11 +92,12 @@ textarea{resize:vertical;min-height:60px;line-height:1.5}
 /* CALENDAR */
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:8px}
 .cal-hdr{text-align:center;font-size:10px;color:var(--txt2);padding:4px 0;font-weight:500}
-.cal-day{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--txt2);background:var(--bg2);position:relative;cursor:default}
-.cal-day.empty{background:transparent}
+.cal-day{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--txt2);background:var(--bg2);position:relative;cursor:pointer;transition:all 0.1s}
+.cal-day:active{transform:scale(0.95)}
+.cal-day.empty{background:transparent;cursor:default}
 .cal-day.today{border:1.5px solid var(--blue);color:var(--blue);font-weight:500}
-.cal-day.has-log{background:var(--blue);color:#fff;font-weight:500}
-.cal-day.has-log.today{background:var(--blue-d)}
+.cal-day.has-log{background:var(--blue-l);color:var(--blue-d);font-weight:500;border:1px solid var(--blue)}
+.cal-day.has-log.today{background:var(--blue);color:#fff}
 .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .cal-nav-btn{padding:4px 10px;border-radius:99px;border:0.5px solid var(--brd2);background:transparent;font-size:13px;cursor:pointer;color:var(--txt)}
 .cal-month-label{font-size:14px;font-weight:500}
@@ -219,8 +220,10 @@ textarea{resize:vertical;min-height:60px;line-height:1.5}
       </div>
       <div class="cal-grid" id="cal-grid"></div>
       <div style="display:flex;gap:12px;margin-top:10px;font-size:11px;color:var(--txt2)">
-        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:3px;background:var(--blue);display:inline-block"></span>Worked out</span>
-        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:3px;border:1.5px solid var(--blue);display:inline-block"></span>Today</span>
+        <span style="display:flex;align-items:center;gap:4px">Click any day to see details</span>
+      </div>
+      <!-- Clickable Calendar Details Container -->
+      <div id="cal-day-details" style="display:none; margin-top:12px; padding-top:12px; border-top:0.5px solid var(--brd)">
       </div>
     </div>
 
@@ -373,7 +376,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.5}
   </div>
 </div><!-- end .app -->
 
-<!-- EDIT MODAL (reused for fitness/sleep/content) -->
+<!-- EDIT MODAL -->
 <div class="modal-bg" id="edit-modal">
   <div class="modal">
     <div class="modal-title" id="edit-modal-title">Edit entry</div>
@@ -491,7 +494,6 @@ function showApp(){
   loadAllData();
 }
 
-// Check existing session on load
 window.addEventListener('load', async ()=>{
   const {data:{session}} = await sb.auth.getSession();
   if(session){ currentUser = session.user; showApp(); }
@@ -593,18 +595,25 @@ function showActForm(act){
   document.getElementById('act-form-panel').style.display='block';
   const today = new Date().toISOString().split('T')[0];
   let html = `<div class="inp-group" style="margin-bottom:8px"><label>Date</label><input type="date" id="f-date" value="${today}"></div>`;
-  if(act==='run'||act==='swim'||act==='cycle'){
-    document.getElementById('act-form-title').textContent='Log '+getActLabel(act).toLowerCase();
+  
+  if(act==='run'){
+    document.getElementById('act-form-title').textContent='Log run';
     html+=`<div class="inp-grid"><div class="inp-group"><label>Distance (km)</label><input type="number" id="f-dist" placeholder="e.g. 5.2" step="0.1" min="0"></div><div class="inp-group"><label>Pace (min/km)</label><input type="text" id="f-pace" placeholder="e.g. 5:30"></div><div class="inp-group"><label>Duration (min)</label><input type="number" id="f-time" placeholder="e.g. 35" min="0"></div><div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 155" min="0"></div></div>`;
+  } else if(act==='swim'){
+    document.getElementById('act-form-title').textContent='Log swim';
+    html+=`<div class="inp-grid"><div class="inp-group"><label>Distance (Meters)</label><input type="number" id="f-dist" placeholder="e.g. 1500" min="0"></div><div class="inp-group"><label>Pace (min/100m)</label><input type="text" id="f-pace" placeholder="e.g. 1:45"></div><div class="inp-group"><label>Duration (min)</label><input type="number" id="f-time" placeholder="e.g. 40" min="0"></div><div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 140" min="0"></div></div>`;
+  } else if(act==='cycle'){
+    document.getElementById('act-form-title').textContent='Log cycle';
+    html+=`<div class="inp-grid"><div class="inp-group"><label>Distance (km)</label><input type="number" id="f-dist" placeholder="e.g. 20" step="0.1" min="0"></div><div class="inp-group"><label>Speed (km/hr)</label><input type="number" id="f-speed" placeholder="e.g. 25" step="0.1" min="0"></div><div class="inp-group"><label>Duration (min)</label><input type="number" id="f-time" placeholder="e.g. 60" min="0"></div><div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 130" min="0"></div></div>`;
   } else if(act==='gym'){
     document.getElementById('act-form-title').textContent='Log gym session';
-    html+=`<div class="inp-group" style="margin-bottom:8px"><label>Workout type</label><div class="gym-pills"><button class="pill" onclick="selGym(this,'back')">Back day</button><button class="pill" onclick="selGym(this,'legs')">Leg day</button><button class="pill" onclick="selGym(this,'core')">Core</button><button class="pill" onclick="selGym(this,'cardio')">Cardio</button><button class="pill" onclick="selGym(this,'fullbody')">Full body</button></div></div><div class="inp-grid"><div class="inp-group"><label>Duration (min)</label><input type="number" id="f-time" placeholder="e.g. 60" min="0"></div><div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 140" min="0"></div></div>`;
+    html+=`<div class="inp-group" style="margin-bottom:8px"><label>Workout type</label><div class="gym-pills"><button class="pill" onclick="selGym(this,'back')">Back day</button><button class="pill" onclick="selGym(this,'legs')">Leg day</button><button class="pill" onclick="selGym(this,'core')">Core</button><button class="pill" onclick="selGym(this,'cardio')">Cardio</button><button class="pill" onclick="selGym(this,'fullbody')">Full body</button></div></div><div class="inp-grid"><div class="inp-group"><label>Duration (min)</label><input type="number" id="f-time" placeholder="e.g. 60" min="0"></div><div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 140" min="0"></div></div><div class="inp-group" style="margin-top:8px"><label>Notes / Exercises</label><textarea id="f-notes" placeholder="e.g. Squats 3x10, Leg Press 3x12..."></textarea></div>`;
   } else if(act==='ocr'){
     document.getElementById('act-form-title').textContent='Log obstacle course';
     html+=`<div class="inp-grid"><div class="inp-group"><label>Duration (min)</label><input type="number" id="f-time" placeholder="e.g. 90" min="0"></div><div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 168" min="0"></div><div class="inp-group"><label>Distance (km)</label><input type="number" id="f-dist" placeholder="e.g. 12" step="0.1" min="0"></div><div class="inp-group"><label>No. of obstacles</label><input type="number" id="f-obs" placeholder="e.g. 25" min="0"></div></div><div class="inp-group" style="margin-top:8px"><label>Notes</label><textarea id="f-notes" placeholder="e.g. Nailed rope climb..."></textarea></div>`;
   } else {
     document.getElementById('act-form-title').textContent='Log '+getActLabel(act).toLowerCase();
-    html+=`<div class="inp-grid"><div class="inp-group"><label>Duration (min)</label><input type="number" id="f-time" placeholder="e.g. 45" min="0"></div><div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 145" min="0"></div><div class="inp-group"><label>Distance (km)</label><input type="number" id="f-dist" step="0.1" min="0"></div></div><div class="inp-group" style="margin-top:8px"><label>Notes</label><textarea id="f-notes" placeholder="Any notes..."></textarea></div>`;
+    html+=`<div class="inp-grid"><div class="inp-group"><label>Duration (min)</label><input type="number" id="f-time" placeholder="e.g. 45" min="0"></div><div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 145" min="0"></div><div class="inp-group"><label>Distance</label><input type="number" id="f-dist" step="0.1" min="0"></div></div><div class="inp-group" style="margin-top:8px"><label>Notes</label><textarea id="f-notes" placeholder="Any notes..."></textarea></div>`;
   }
   document.getElementById('act-form-fields').innerHTML = html;
 }
@@ -615,12 +624,20 @@ async function saveActivityLog(){
   if(!selectedAct) return showToast('Select an activity first');
   const dateEl=document.getElementById('f-date');
   if(!dateEl||!dateEl.value) return showToast('Select a date');
+  
+  // Set accurate units to save to database based on activity selected
+  let dUnit = 'km', pUnit = 'min/km';
+  if(selectedAct === 'swim') { dUnit = 'm'; pUnit = 'min/100m'; }
+  
   const row = {
     user_id: currentUser.id,
     date: dateEl.value,
     activity: getActLabel(selectedAct),
     distance: document.getElementById('f-dist')?.value ? parseFloat(document.getElementById('f-dist').value) : null,
+    distance_unit: dUnit,
     pace: document.getElementById('f-pace')?.value || null,
+    pace_unit: pUnit,
+    speed: document.getElementById('f-speed')?.value ? parseFloat(document.getElementById('f-speed').value) : null,
     duration: document.getElementById('f-time')?.value ? parseInt(document.getElementById('f-time').value) : null,
     heart_rate: document.getElementById('f-hr')?.value ? parseInt(document.getElementById('f-hr').value) : null,
     gym_type: selectedAct==='gym' ? (selectedGymType ? {back:'Back day',legs:'Leg day',core:'Core',cardio:'Cardio',fullbody:'Full body'}[selectedGymType] : null) : null,
@@ -628,13 +645,39 @@ async function saveActivityLog(){
     notes: document.getElementById('f-notes')?.value || null
   };
   if(selectedAct==='gym'&&!row.gym_type) return showToast('Pick a workout type');
+  
   const {error} = await sb.from('fitness_logs').insert(row);
   if(error) return showToast('Error: '+error.message);
+  
   document.querySelectorAll('#act-form-fields input,#act-form-fields textarea').forEach(i=>i.value='');
   document.querySelectorAll('.gym-pills .pill').forEach(b=>b.classList.remove('active'));
   selectedGymType=null;
   showToast(getActLabel(selectedAct)+' logged!');
   await loadFitness();
+}
+
+// Formats the labels safely, using database units if they exist or falling back to defaults
+function formatLogMeta(l) {
+  let meta = [];
+  const actLC = l.activity.toLowerCase();
+  
+  if(l.distance) {
+     let unit = l.distance_unit || (actLC === 'swim' ? 'm' : 'km');
+     meta.push(l.distance + unit);
+  }
+  if(l.speed) {
+     meta.push(l.speed + ' km/hr');
+  } else if(l.pace) {
+     let unit = l.pace_unit || (actLC === 'swim' ? '/100m' : '/km');
+     let pStr = l.pace;
+     if(!pStr.includes('/')) pStr += unit;
+     meta.push(pStr);
+  }
+  if(l.duration) meta.push(l.duration + 'min');
+  if(l.heart_rate) meta.push('HR ' + l.heart_rate);
+  if(l.gym_type) meta.push(l.gym_type);
+  if(l.obstacles) meta.push(l.obstacles + ' obstacles');
+  return meta;
 }
 
 function renderRecentLogs(actId){
@@ -646,14 +689,9 @@ function renderRecentLogs(actId){
   card.style.display='block';
   title.textContent='Recent: '+actLabel;
   if(!logs.length){ list.innerHTML='<div class="empty-state">No '+actLabel+' logs yet</div>'; return; }
+  
   list.innerHTML = logs.map(l=>{
-    let meta=[];
-    if(l.distance) meta.push(l.distance+'km');
-    if(l.pace) meta.push(l.pace+'/km');
-    if(l.duration) meta.push(l.duration+'min');
-    if(l.heart_rate) meta.push('HR '+l.heart_rate);
-    if(l.gym_type) meta.push(l.gym_type);
-    if(l.obstacles) meta.push(l.obstacles+' obstacles');
+    const meta = formatLogMeta(l);
     return `<div class="log-item">
       <div class="log-item-main">
         <div class="log-item-date">${fmtDate(l.date)}</div>
@@ -678,22 +716,34 @@ function editFitnessLog(id){
   const l = allFitnessLogs.find(x=>x.id===id);
   if(!l) return;
   document.getElementById('edit-modal-title').textContent='Edit fitness log';
+  
+  const actLC = l.activity.toLowerCase();
+  const isSwim = actLC === 'swim';
+  const isCycle = actLC === 'cycle';
+  const distUnit = l.distance_unit || (isSwim ? 'm' : 'km');
+  const paceUnit = l.pace_unit || (isSwim ? 'min/100m' : 'min/km');
+  
   document.getElementById('edit-modal-body').innerHTML=`
     <div class="inp-group"><label>Date</label><input type="date" id="em-date" value="${l.date}"></div>
     <div class="inp-grid" style="margin-top:8px">
-      <div class="inp-group"><label>Distance (km)</label><input type="number" id="em-dist" value="${l.distance||''}" step="0.1" min="0"></div>
-      <div class="inp-group"><label>Pace</label><input type="text" id="em-pace" value="${l.pace||''}"></div>
+      <div class="inp-group"><label>Distance (${distUnit})</label><input type="number" id="em-dist" value="${l.distance||''}" step="0.1" min="0"></div>
+      ${isCycle 
+        ? `<div class="inp-group"><label>Speed (km/hr)</label><input type="number" id="em-speed" value="${l.speed||''}" step="0.1"></div>`
+        : `<div class="inp-group"><label>Pace (${paceUnit})</label><input type="text" id="em-pace" value="${l.pace||''}"></div>`
+      }
       <div class="inp-group"><label>Duration (min)</label><input type="number" id="em-time" value="${l.duration||''}" min="0"></div>
       <div class="inp-group"><label>Heart rate</label><input type="number" id="em-hr" value="${l.heart_rate||''}" min="0"></div>
     </div>
     ${l.gym_type?`<div class="inp-group" style="margin-top:8px"><label>Workout type</label><input type="text" id="em-gymtype" value="${l.gym_type}"></div>`:''}
     ${l.obstacles!==null?`<div class="inp-group" style="margin-top:8px"><label>Obstacles</label><input type="number" id="em-obs" value="${l.obstacles||''}"></div>`:''}
     <div class="inp-group" style="margin-top:8px"><label>Notes</label><textarea id="em-notes">${l.notes||''}</textarea></div>`;
+    
   editModalSaveFn = async ()=>{
     const upd = {
       date: document.getElementById('em-date').value,
       distance: document.getElementById('em-dist')?.value ? parseFloat(document.getElementById('em-dist').value) : null,
       pace: document.getElementById('em-pace')?.value || null,
+      speed: document.getElementById('em-speed')?.value ? parseFloat(document.getElementById('em-speed').value) : null,
       duration: document.getElementById('em-time')?.value ? parseInt(document.getElementById('em-time').value) : null,
       heart_rate: document.getElementById('em-hr')?.value ? parseInt(document.getElementById('em-hr').value) : null,
       gym_type: document.getElementById('em-gymtype')?.value || null,
@@ -710,26 +760,85 @@ function editFitnessLog(id){
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // CALENDAR
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function calMove(dir){ calMonth+=dir; if(calMonth>11){calMonth=0;calYear++;} if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); }
+function calMove(dir){ calMonth+=dir; if(calMonth>11){calMonth=0;calYear++;} if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); document.getElementById('cal-day-details').style.display='none'; }
 
 function renderCalendar(){
   const label = new Date(calYear,calMonth,1).toLocaleString('en-US',{month:'long',year:'numeric'});
   document.getElementById('cal-label').textContent = label;
   const ym = calYear+'-'+String(calMonth+1).padStart(2,'0');
-  const logDays = new Set(allFitnessLogs.filter(l=>l.date&&l.date.startsWith(ym)).map(l=>parseInt(l.date.split('-')[2])));
+  
+  const logDays = {};
+  allFitnessLogs.filter(l=>l.date&&l.date.startsWith(ym)).forEach(l=>{
+     const d = parseInt(l.date.split('-')[2]);
+     if(!logDays[d]) logDays[d] = [];
+     logDays[d].push(l.activity);
+  });
+  
   const today = new Date(); const todayYM = today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0');
   const isThisMonth = ym===todayYM;
   const firstDay = new Date(calYear,calMonth,1).getDay();
   const daysInMonth = new Date(calYear,calMonth+1,0).getDate();
   const days = ['Su','Mo','Tu','We','Th','Fr','Sa'];
   let html = days.map(d=>`<div class="cal-hdr">${d}</div>`).join('');
+  
   for(let i=0;i<firstDay;i++) html+=`<div class="cal-day empty"></div>`;
   for(let d=1;d<=daysInMonth;d++){
     const isToday = isThisMonth && d===today.getDate();
-    const hasLog  = logDays.has(d);
-    html+=`<div class="cal-day ${hasLog?'has-log':''} ${isToday?'today':''}">${d}</div>`;
+    const dayLogs = logDays[d] || [];
+    const hasLog  = dayLogs.length > 0;
+    
+    let content = d;
+    if(hasLog) {
+       const actName = dayLogs[0].toLowerCase();
+       let icon = '⭐';
+       if(actName.includes('run')) icon='🏃';
+       else if(actName.includes('gym')) icon='🏋️';
+       else if(actName.includes('swim')) icon='🏊';
+       else if(actName.includes('cycle')) icon='🚴';
+       else if(actName.includes('ocr') || actName.includes('obstacle')) icon='🧗';
+       content = `<span style="font-size:14px">${icon}</span>`;
+    }
+    
+    html+=`<div class="cal-day ${hasLog?'has-log':''} ${isToday?'today':''}" onclick="showCalDayDetails('${ym}-${String(d).padStart(2,'0')}')">${content}</div>`;
   }
   document.getElementById('cal-grid').innerHTML=html;
+}
+
+function showCalDayDetails(dateString) {
+   const container = document.getElementById('cal-day-details');
+   container.style.display = 'block';
+   const logs = allFitnessLogs.filter(l => l.date === dateString);
+   
+   if(!logs.length) {
+      container.innerHTML = `<div style="font-size:13px; font-weight:500; margin-bottom:8px">${fmtDate(dateString)}</div><div class="empty-state" style="padding:1rem; border:0.5px solid var(--brd); border-radius:var(--rad)">No workouts recorded on this date.</div>`;
+      return;
+   }
+   
+   let html = `<div style="font-size:13px; font-weight:500; margin-bottom:8px">Logs for ${fmtDate(dateString)}</div><div class="logs-list">`;
+   
+   html += logs.map(l=>{
+    const meta = formatLogMeta(l);
+    const actName = l.activity.toLowerCase();
+    let icon = '⭐';
+    if(actName.includes('run')) icon='🏃';
+    else if(actName.includes('gym')) icon='🏋️';
+    else if(actName.includes('swim')) icon='🏊';
+    else if(actName.includes('cycle')) icon='🚴';
+    else if(actName.includes('ocr') || actName.includes('obstacle')) icon='🧗';
+    
+    return `<div class="log-item">
+      <div class="log-item-main">
+        <div class="log-item-detail">${icon} ${l.activity}${meta.length?' — '+meta.join(' · '):''}</div>
+        ${l.notes?`<div class="log-item-meta" style="font-style:italic">${l.notes}</div>`:''}
+      </div>
+      <div class="log-item-actions">
+        <button class="icon-btn" onclick="editFitnessLog('${l.id}')">✏</button>
+      </div>
+    </div>`;
+  }).join('');
+  
+  html += `</div>`;
+  container.innerHTML = html;
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
