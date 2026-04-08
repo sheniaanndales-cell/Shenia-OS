@@ -594,29 +594,117 @@ function showActForm(act){
   document.getElementById('act-form-panel').style.display='block';
   const today = new Date().toISOString().split('T')[0];
   let html = `<div class="inp-group" style="margin-bottom:8px"><label>Date</label><input type="date" id="f-date" value="${today}"></div>`;
+  // Duration block helper — cycling uses hrs/min, others use min/sec
+  const durBlockCycle = `<div class="inp-group"><label>Duration</label><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><div style="position:relative"><input type="number" id="f-dur-h" placeholder="0" min="0" oninput="autoCalcPace('${act}')" style="padding-right:28px"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--txt2);pointer-events:none">hr</span></div><div style="position:relative"><input type="number" id="f-dur-m" placeholder="0" min="0" max="59" oninput="autoCalcPace('${act}')" style="padding-right:28px"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--txt2);pointer-events:none">min</span></div></div></div>`;
+  const durBlockMin  = `<div class="inp-group"><label>Duration</label><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><div style="position:relative"><input type="number" id="f-dur-m" placeholder="0" min="0" oninput="autoCalcPace('${act}')" style="padding-right:30px"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--txt2);pointer-events:none">min</span></div><div style="position:relative"><input type="number" id="f-dur-s" placeholder="0" min="0" max="59" oninput="autoCalcPace('${act}')" style="padding-right:28px"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--txt2);pointer-events:none">sec</span></div></div></div>`;
+
   if(act==='run'){
     document.getElementById('act-form-title').textContent='Log run';
-    html+=`<div class="inp-grid"><div class="inp-group"><label>Distance (km)</label><input type="number" id="f-dist" placeholder="e.g. 5.2" step="0.1" min="0"></div><div class="inp-group"><label>Pace (min/km)</label><input type="text" id="f-pace" placeholder="e.g. 5:30"></div><div class="inp-group"><label>Duration (min)</label><input type="number" id="f-time" placeholder="e.g. 35" min="0"></div><div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 155" min="0"></div></div>`;
+    html+=`<div class="inp-grid">
+      <div class="inp-group"><label>Distance (km)</label><input type="number" id="f-dist" placeholder="e.g. 5.2" step="0.01" min="0" oninput="autoCalcPace('run')"></div>
+      <div class="inp-group"><label>Pace (min/km) <span style="font-size:10px;color:var(--green)">(auto)</span></label><input type="text" id="f-pace" placeholder="auto-calculated" readonly style="background:var(--bg2)"></div>
+      ${durBlockMin}
+      <div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 155" min="0"></div>
+    </div>`;
   } else if(act==='swim'){
     document.getElementById('act-form-title').textContent='Log swim';
-    html+=`<div class="inp-grid"><div class="inp-group"><label>Distance (m)</label><input type="number" id="f-dist" placeholder="e.g. 1500" step="1" min="0"></div><div class="inp-group"><label>Pace (min/100m)</label><input type="text" id="f-pace" placeholder="e.g. 2:05"></div><div class="inp-group"><label>Duration (min)</label><input type="number" id="f-time" placeholder="e.g. 35" min="0"></div><div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 145" min="0"></div></div>`;
+    html+=`<div class="inp-grid">
+      <div class="inp-group"><label>Distance (m)</label><input type="number" id="f-dist" placeholder="e.g. 1500" step="1" min="0" oninput="autoCalcPace('swim')"></div>
+      <div class="inp-group"><label>Pace (min/100m) <span style="font-size:10px;color:var(--green)">(auto)</span></label><input type="text" id="f-pace" placeholder="auto-calculated" readonly style="background:var(--bg2)"></div>
+      ${durBlockMin}
+      <div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 145" min="0"></div>
+    </div>`;
   } else if(act==='cycle'){
     document.getElementById('act-form-title').textContent='Log cycle';
-    html+=`<div class="inp-grid"><div class="inp-group"><label>Distance (km)</label><input type="number" id="f-dist" placeholder="e.g. 30" step="0.1" min="0"></div><div class="inp-group"><label>Speed (km/hr)</label><input type="number" id="f-pace" placeholder="e.g. 28" step="0.1" min="0"></div><div class="inp-group"><label>Duration (min)</label><input type="number" id="f-time" placeholder="e.g. 65" min="0"></div><div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 150" min="0"></div></div>`;
+    html+=`<div class="inp-grid">
+      <div class="inp-group"><label>Distance (km)</label><input type="number" id="f-dist" placeholder="e.g. 30" step="0.1" min="0" oninput="autoCalcPace('cycle')"></div>
+      <div class="inp-group"><label>Speed (km/hr) <span style="font-size:10px;color:var(--green)">(auto)</span></label><input type="number" id="f-pace" placeholder="auto-calculated" readonly style="background:var(--bg2)"></div>
+      ${durBlockCycle}
+      <div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 150" min="0"></div>
+    </div>`;
   } else if(act==='gym'){
     document.getElementById('act-form-title').textContent='Log gym session';
-    html+=`<div class="inp-group" style="margin-bottom:8px"><label>Workout type</label><div class="gym-pills"><button class="pill" onclick="selGym(this,'back')">Back day</button><button class="pill" onclick="selGym(this,'legs')">Leg day</button><button class="pill" onclick="selGym(this,'core')">Core</button><button class="pill" onclick="selGym(this,'cardio')">Cardio</button><button class="pill" onclick="selGym(this,'fullbody')">Full body</button></div></div><div class="inp-grid"><div class="inp-group"><label>Duration (min)</label><input type="number" id="f-time" placeholder="e.g. 60" min="0"></div><div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 140" min="0"></div></div><div class="inp-group" style="margin-top:8px"><label>Notes (exercises, sets, reps...)</label><textarea id="f-notes" placeholder="e.g. Bench 4x8 @ 80kg, Squats 4x6 @ 100kg..."></textarea></div>`;
+    html+=`<div class="inp-group" style="margin-bottom:8px"><label>Workout type</label><div class="gym-pills"><button class="pill" onclick="selGym(this,'back')">Back day</button><button class="pill" onclick="selGym(this,'legs')">Leg day</button><button class="pill" onclick="selGym(this,'core')">Core</button><button class="pill" onclick="selGym(this,'cardio')">Cardio</button><button class="pill" onclick="selGym(this,'fullbody')">Full body</button></div></div>
+    <div class="inp-grid">${durBlockMin}<div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 140" min="0"></div></div>
+    <div class="inp-group" style="margin-top:8px"><label>Notes (exercises, sets, reps...)</label><textarea id="f-notes" placeholder="e.g. Bench 4x8 @ 80kg, Squats 4x6 @ 100kg..."></textarea></div>`;
   } else if(act==='ocr'){
     document.getElementById('act-form-title').textContent='Log obstacle course';
-    html+=`<div class="inp-grid"><div class="inp-group"><label>Duration (min)</label><input type="number" id="f-time" placeholder="e.g. 90" min="0"></div><div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 168" min="0"></div><div class="inp-group"><label>Distance (km)</label><input type="number" id="f-dist" placeholder="e.g. 12" step="0.1" min="0"></div><div class="inp-group"><label>No. of obstacles</label><input type="number" id="f-obs" placeholder="e.g. 25" min="0"></div></div><div class="inp-group" style="margin-top:8px"><label>Notes</label><textarea id="f-notes" placeholder="e.g. Nailed rope climb..."></textarea></div>`;
+    html+=`<div class="inp-grid">
+      ${durBlockMin}
+      <div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 168" min="0"></div>
+      <div class="inp-group"><label>Distance (km)</label><input type="number" id="f-dist" placeholder="e.g. 12" step="0.1" min="0"></div>
+      <div class="inp-group"><label>No. of obstacles</label><input type="number" id="f-obs" placeholder="e.g. 25" min="0"></div>
+    </div>
+    <div class="inp-group" style="margin-top:8px"><label>Notes</label><textarea id="f-notes" placeholder="e.g. Nailed rope climb..."></textarea></div>`;
   } else {
     document.getElementById('act-form-title').textContent='Log '+getActLabel(act).toLowerCase();
-    html+=`<div class="inp-grid"><div class="inp-group"><label>Duration (min)</label><input type="number" id="f-time" placeholder="e.g. 45" min="0"></div><div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 145" min="0"></div><div class="inp-group"><label>Distance (km)</label><input type="number" id="f-dist" step="0.1" min="0"></div></div><div class="inp-group" style="margin-top:8px"><label>Notes</label><textarea id="f-notes" placeholder="Any notes..."></textarea></div>`;
+    html+=`<div class="inp-grid">
+      ${durBlockMin}
+      <div class="inp-group"><label>Heart rate (bpm)</label><input type="number" id="f-hr" placeholder="e.g. 145" min="0"></div>
+      <div class="inp-group"><label>Distance (km)</label><input type="number" id="f-dist" step="0.1" min="0"></div>
+    </div>
+    <div class="inp-group" style="margin-top:8px"><label>Notes</label><textarea id="f-notes" placeholder="Any notes..."></textarea></div>`;
   }
   document.getElementById('act-form-fields').innerHTML = html;
 }
 
 function selGym(btn,type){ document.querySelectorAll('.gym-pills .pill').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); selectedGymType=type; }
+
+// ── AUTO-PACE CALCULATOR ──────────────────────────────────────────────────────
+function getDurationTotalMinutes(act){
+  if(act==='cycle'){
+    const h = parseFloat(document.getElementById('f-dur-h')?.value)||0;
+    const m = parseFloat(document.getElementById('f-dur-m')?.value)||0;
+    return h*60 + m;
+  } else {
+    const m = parseFloat(document.getElementById('f-dur-m')?.value)||0;
+    const s = parseFloat(document.getElementById('f-dur-s')?.value)||0;
+    return m + s/60;
+  }
+}
+
+function getDurationDisplay(act){
+  if(act==='cycle'){
+    const h = parseInt(document.getElementById('f-dur-h')?.value)||0;
+    const m = parseInt(document.getElementById('f-dur-m')?.value)||0;
+    if(h>0&&m>0) return h+'hr '+m+'min';
+    if(h>0) return h+'hr';
+    return m+'min';
+  } else {
+    const m = parseInt(document.getElementById('f-dur-m')?.value)||0;
+    const s = parseInt(document.getElementById('f-dur-s')?.value)||0;
+    if(m>0&&s>0) return m+'min '+s+'sec';
+    if(m>0) return m+'min';
+    return s ? s+'sec' : '';
+  }
+}
+
+function autoCalcPace(act){
+  const distEl = document.getElementById('f-dist');
+  const paceEl = document.getElementById('f-pace');
+  if(!distEl||!paceEl) return;
+  const dist = parseFloat(distEl.value)||0;
+  const totalMin = getDurationTotalMinutes(act);
+  if(dist<=0||totalMin<=0){ paceEl.value=''; return; }
+
+  if(act==='run'){
+    // Pace = total minutes / km → format as mm:ss per km
+    const paceMinPerKm = totalMin / dist;
+    const pm = Math.floor(paceMinPerKm);
+    const ps = Math.round((paceMinPerKm - pm)*60);
+    paceEl.value = pm+':'+(ps<10?'0':'')+ps;
+  } else if(act==='swim'){
+    // Pace = total minutes / (dist/100) → format as mm:ss per 100m
+    const pacePer100 = totalMin / (dist/100);
+    const pm = Math.floor(pacePer100);
+    const ps = Math.round((pacePer100 - pm)*60);
+    paceEl.value = pm+':'+(ps<10?'0':'')+ps;
+  } else if(act==='cycle'){
+    // Speed = distance / (total minutes / 60) → km/hr
+    const hrs = totalMin/60;
+    if(hrs>0) paceEl.value = (dist/hrs).toFixed(1);
+  }
+}
 
 async function saveActivityLog(){
   if(!selectedAct) return showToast('Select an activity first');
@@ -625,6 +713,9 @@ async function saveActivityLog(){
   // Determine distance unit and pace label based on activity
   const distUnit = selectedAct==='swim' ? 'm' : 'km';
   const paceLabel = selectedAct==='cycle' ? 'km/hr' : (selectedAct==='swim' ? 'min/100m' : 'min/km');
+  // Compute total duration in minutes (decimal) from split fields
+  const totalDurMin = getDurationTotalMinutes(selectedAct);
+  const durDisplay  = getDurationDisplay(selectedAct);
   const row = {
     user_id: currentUser.id,
     date: dateEl.value,
@@ -633,7 +724,8 @@ async function saveActivityLog(){
     distance_unit: distUnit,
     pace: document.getElementById('f-pace')?.value || null,
     pace_label: paceLabel,
-    duration: document.getElementById('f-time')?.value ? parseInt(document.getElementById('f-time').value) : null,
+    duration: totalDurMin > 0 ? parseFloat(totalDurMin.toFixed(2)) : null,
+    duration_display: durDisplay || null,
     heart_rate: document.getElementById('f-hr')?.value ? parseInt(document.getElementById('f-hr').value) : null,
     gym_type: selectedAct==='gym' ? (selectedGymType ? {back:'Back day',legs:'Leg day',core:'Core',cardio:'Cardio',fullbody:'Full body'}[selectedGymType] : null) : null,
     obstacles: document.getElementById('f-obs')?.value ? parseInt(document.getElementById('f-obs').value) : null,
@@ -656,7 +748,9 @@ function buildFitnessMeta(l){
   let meta=[];
   if(l.distance) meta.push(l.distance+distUnit);
   if(l.pace) meta.push(l.pace+' '+paceLabel);
-  if(l.duration) meta.push(l.duration+'min');
+  // Prefer the human-readable duration_display, fall back to raw minutes
+  if(l.duration_display) meta.push(l.duration_display);
+  else if(l.duration) meta.push(l.duration+'min');
   if(l.heart_rate) meta.push('HR '+l.heart_rate);
   if(l.gym_type) meta.push(l.gym_type);
   if(l.obstacles) meta.push(l.obstacles+' obstacles');
@@ -708,20 +802,30 @@ function editFitnessLog(id){
     <div class="inp-grid" style="margin-top:8px">
       ${l.distance!==null||actKey!=='gym'?`<div class="inp-group"><label>${distLabel}</label><input type="number" id="em-dist" value="${l.distance||''}" step="${actKey==='swim'?'1':'0.1'}" min="0"></div>`:''}
       ${actKey!=='gym'&&actKey!=='ocr'?`<div class="inp-group"><label>${speedLabel}</label><input type="text" id="em-pace" value="${l.pace||''}"></div>`:''}
-      <div class="inp-group"><label>Duration (min)</label><input type="number" id="em-time" value="${l.duration||''}" min="0"></div>
+      <div class="inp-group"><label>Duration (min, decimal ok)</label><input type="number" id="em-time" value="${l.duration||''}" min="0" step="0.01" placeholder="e.g. 43.07 = 43min 4sec"></div>
       <div class="inp-group"><label>Heart rate</label><input type="number" id="em-hr" value="${l.heart_rate||''}" min="0"></div>
     </div>
     ${l.gym_type?`<div class="inp-group" style="margin-top:8px"><label>Workout type</label><input type="text" id="em-gymtype" value="${l.gym_type}"></div>`:''}
     ${l.obstacles!==null&&l.obstacles!==undefined?`<div class="inp-group" style="margin-top:8px"><label>Obstacles</label><input type="number" id="em-obs" value="${l.obstacles||''}"></div>`:''}
     <div class="inp-group" style="margin-top:8px"><label>Notes</label><textarea id="em-notes">${l.notes||''}</textarea></div>`;
   editModalSaveFn = async ()=>{
+    const rawDur = document.getElementById('em-time')?.value;
+    const durDecimal = rawDur ? parseFloat(rawDur) : null;
+    // Rebuild a readable display string from decimal minutes
+    let durDisp = null;
+    if(durDecimal){
+      const wholeMin = Math.floor(durDecimal);
+      const secs = Math.round((durDecimal - wholeMin)*60);
+      durDisp = wholeMin > 0 && secs > 0 ? wholeMin+'min '+secs+'sec' : wholeMin > 0 ? wholeMin+'min' : secs+'sec';
+    }
     const upd = {
       date: document.getElementById('em-date').value,
       distance: document.getElementById('em-dist')?.value ? parseFloat(document.getElementById('em-dist').value) : null,
       distance_unit: distUnit,
       pace: document.getElementById('em-pace')?.value || null,
       pace_label: paceLabel,
-      duration: document.getElementById('em-time')?.value ? parseInt(document.getElementById('em-time').value) : null,
+      duration: durDecimal,
+      duration_display: durDisp,
       heart_rate: document.getElementById('em-hr')?.value ? parseInt(document.getElementById('em-hr').value) : null,
       gym_type: document.getElementById('em-gymtype')?.value || null,
       obstacles: document.getElementById('em-obs')?.value ? parseInt(document.getElementById('em-obs').value) : null,
@@ -768,12 +872,12 @@ function renderCalendar(){
     const logs = dayLogs[d] || [];
     const hasLog = logs.length > 0;
     // Get unique emojis for the day (up to 2 to avoid overflow)
-    const emojis = [...new Set(logs.map(l=>getActEmoji(l.activity)))].slice(0,2).join('');
+    const emojis = [...new Set(logs.map(l=>getActEmoji(l.activity)))].slice(0,3).join('');
     const dateStr = ym+'-'+String(d).padStart(2,'0');
     if(hasLog){
-      html+=`<div class="cal-day has-log ${isToday?'today':''}" onclick="showCalDetail('${dateStr}')" style="cursor:pointer;flex-direction:column;gap:1px;font-size:9px">
-        <span style="font-size:14px;line-height:1">${emojis}</span>
-        <span>${d}</span>
+      html+=`<div class="cal-day has-log ${isToday?'today':''}" onclick="showCalDetail('${dateStr}')" style="cursor:pointer;flex-direction:column;font-size:9px;padding:2px 0">
+        <span style="font-size:12px;line-height:1.1;letter-spacing:-1px">${emojis}</span>
+        <span style="margin-top:3px">${d}</span>
       </div>`;
     } else {
       html+=`<div class="cal-day ${isToday?'today':''}">${d}</div>`;
